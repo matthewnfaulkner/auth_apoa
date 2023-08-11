@@ -22,7 +22,7 @@
  * @copyright  1999 onwards Martin Dougiamas  http://dougiamas.com
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace auth_federationmember;
+namespace auth_apoa;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -228,6 +228,7 @@ class signupexisting_form extends \login_signup_form {
     }
 
     public function validate_existing_email(){
+        return null;
         $user = array('username' => 'abbie123',
             'firstname' => 'Abbie',
             'lastname' => 'Jones');

@@ -35,7 +35,7 @@ $p = optional_param('p', '', PARAM_ALPHANUM);   // Old parameter:  secret
 $s = optional_param('s', '', PARAM_RAW);        // Old parameter:  username
 $redirect = optional_param('redirect', '', PARAM_LOCALURL);    // Where to redirect the browser once the user has been confirmed.
 
-$PAGE->set_url('/auth/federationmember/federation_confirm.php');
+$PAGE->set_url('/auth/apoa/federation_confirm.php');
 $PAGE->set_context(context_system::instance());
 
 if (!$authplugin = signup_get_user_confirmation_authplugin()) {
@@ -76,7 +76,7 @@ if (!empty($data) || (!empty($p) && !empty($s))) {
             throw new \moodle_exception('cannotfinduser', '', '', s($username));
         }
 
-        $authplugin->federation_confirm_email_user($username);
+        $authplugin->send_federation_confirm_to_user($user);
 
         $PAGE->navbar->add(get_string("confirmed"));
         $PAGE->set_title(get_string("confirmed"));
@@ -84,7 +84,7 @@ if (!empty($data) || (!empty($p) && !empty($s))) {
         echo $OUTPUT->header();
         echo $OUTPUT->box_start('generalbox centerpara boxwidthnormal boxaligncenter');
         echo "<h3>".get_string("thanks").", ". fullname($USER) . "</h3>\n";
-        echo "<p>".get_string("confirmed")."</p>\n";
+        echo "<p>".get_string("federationconfirmed", "auth_apoa", fullname($user))."</p>\n";
         echo $OUTPUT->single_button(core_login_get_return_url(), get_string('continue'));
         echo $OUTPUT->box_end();
         echo $OUTPUT->footer();

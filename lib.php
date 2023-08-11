@@ -15,19 +15,31 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin strings are defined here.
+ * Authentication class for apoa is defined here.
  *
- * @package     auth_federationmember
- * @category    string
+ * @package     auth_apoa
  * @copyright   2022 Matthew<you@example.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Federation Authentication';
-$string['pathnewtitle'] = 'New Member';
-$string['pathexistingtitle'] = 'Exisiting Member';
-$string['pathnewdesc'] = 'Select if you have never had an APOA membership or are a member through your national federation';
-$string['pathexistingdesc'] = 'Select if you have an existing membership but not through your national federation';
-$string['checkexistingemail'] = 'Check for exisiting membership';
+
+function is_federation_pending(){
+    global $USER;
+
+    $cache = \cache::make('auth_apoa', 'is_federation_pending_cache');
+    
+    $cachekey = "u.$USER->id";
+    if ($data = $cache->get($cachekey)){
+        return $data['federation_pending'];
+    }
+    else{
+        if($profile = profile_user_record($USER->id)){
+            $federationpending = $profile->federation_pending == 1 ? True : False;
+            $cache->set($cachekey, array('federation_pending' => $federationpending));
+            return $federationpending;
+        }
+        
+    }
+}

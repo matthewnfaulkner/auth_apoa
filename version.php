@@ -17,15 +17,15 @@
 /**
  * Plugin version and other meta-data are defined here.
  *
- * @package     auth_federationmember
+ * @package     auth_apoa
  * @copyright   2022 Matthew<you@example.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'auth_federationmember';
+$plugin->component = 'auth_apoa';
 $plugin->release = '0.1.0';
-$plugin->version = 2023062301;
+$plugin->version = 2023062310;
 $plugin->requires = 2021051700;
 $plugin->maturity = MATURITY_ALPHA;

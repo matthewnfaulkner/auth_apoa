@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Authentication class for federationmember is defined here.
+ * Authentication class for apoa is defined here.
  *
- * @package     auth_federationmember
+ * @package     auth_apoa
  * @copyright   2022 Matthew<you@example.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,8 +29,8 @@ require_once($CFG->dirroot. '/auth/email/auth.php');
 require_once(__DIR__. '/signup_form.php');
 require_once(__DIR__. '/signupexisting_form.php');
 
-use auth_federationmember\signup_form as signup_form;
-use auth_federationmember\signupexisting_form as signupexisting_form;
+use auth_apoa\signup_form as signup_form;
+use auth_apoa\signupexisting_form as signupexisting_form;
 // For further information about authentication plugins please read
 // https://docs.moodle.org/dev/Authentication_plugins.
 //
@@ -38,9 +38,9 @@ use auth_federationmember\signupexisting_form as signupexisting_form;
 // Override functions as needed.
 
 /**
- * Authentication class for federationmember.
+ * Authentication class for apoa.
  */
-class auth_plugin_federationmember extends auth_plugin_email {
+class auth_plugin_apoa extends auth_plugin_email {
 
     public bool $multipath;
 
@@ -49,17 +49,17 @@ class auth_plugin_federationmember extends auth_plugin_email {
      * Set the properties of the instance.
      */
     public function __construct() {
-        $this->authtype = 'federationmember';
+        $this->authtype = 'apoa';
         $this->multipath = True;
         $this->paths = array(
                 'new' => array(
                     'path' => 0,
-                    'title' => get_string('pathnewtitle', 'auth_federationmember'), 
-                    'desc' => get_string('pathnewdesc', 'auth_federationmember')),
+                    'title' => get_string('pathnewtitle', 'auth_apoa'), 
+                    'desc' => get_string('pathnewdesc', 'auth_apoa')),
                 'existing' => array(
                     'path' => 1, 
-                    'title' => get_string('pathexistingtitle', 'auth_federationmember'), 
-                    'desc' => get_string('pathexistingdesc', 'auth_federationmember')
+                    'title' => get_string('pathexistingtitle', 'auth_apoa'), 
+                    'desc' => get_string('pathexistingdesc', 'auth_apoa')
             ));
     }
 
@@ -70,11 +70,11 @@ class auth_plugin_federationmember extends auth_plugin_email {
      */
     function signup_form() {
         global $CFG;
-
+        $this->get_subscription_headers();
         $params = array('path' => $_POST['path'], 
         'emailexists' =>$_POST['emailexists'], 
-        'existingemail' => $_POST['existingemail'],
-        'createuser' => $_POST['submitutton'],);
+        'createuser' => $_POST['submitbutton'],
+        'makenewuser' => $_POST['makenewuser'],);
         return new signup_form(null, $params, 'post', '', array('autocomplete'=>'on'));
     }
 
@@ -91,7 +91,7 @@ class auth_plugin_federationmember extends auth_plugin_email {
             $params[$key] = $value;
         }
         
-        return new signupexisting_form($url, $params, 'post', '', array('autocomplete'=>'on'));
+        return new signup_form($url, $params, 'post', '', array('autocomplete'=>'on'));
     }
     
     public function get_paths(){
@@ -150,7 +150,9 @@ class auth_plugin_federationmember extends auth_plugin_email {
             if($federation = $user->profile_field_federation){
                 $user->profile_field_federation_pending = 1;
                 $formattedfederation = strtolower(preg_replace('/[^A-Za-z]/', '', $federation));
-                $federationemail = get_config('auth_federationmember', 'federationemail'.$formattedfederation);
+                if(!$federationemail = get_config('auth_apoa', 'federationemail'.$formattedfederation)){
+                    throw new \moodle_exception('auth_emailnofederationemail', 'auth_apoa');
+                }
             }
         }
         $user->id = user_create_user($user, false, false);
@@ -159,7 +161,7 @@ class auth_plugin_federationmember extends auth_plugin_email {
 
         // Save any custom profile field information.
         profile_save_data($user);
-
+        
         // Save wantsurl against user's profile, so we can return them there upon confirmation.
         if (!empty($SESSION->wantsurl)) {
             set_user_preference('auth_email_wantsurl', $SESSION->wantsurl, $user);
@@ -167,32 +169,16 @@ class auth_plugin_federationmember extends auth_plugin_email {
 
         // Trigger event.
         \core\event\user_created::create_from_userid($user->id)->trigger();
-        $confirmationurl = new moodle_url('/auth/federationmember/confirm.php', array('data' => "$user->secret/$user->username"));
-        redirect($confirmationurl->out());
 
         if($federationemail){
-            $confirmationurl = new moodle_url('/auth/federationmember/user_confirm.php', array('data' => "$user->secret/$user->username"));
-            redirect($confirmationurl->out());
-            if (! $this->send_confirmation_email_to_federation($user, $federationemail, $confirmationurl)) {
-                throw new \moodle_exception('auth_emailnoemail', 'auth_email');
-            }
-            if ($notify) {
-                global $CFG, $PAGE, $OUTPUT;
-                $emailconfirm = get_string('emailfederationconfirm');
-                $PAGE->navbar->add($emailconfirm);
-                $PAGE->set_title($emailconfirm);
-                $PAGE->set_heading($PAGE->course->fullname);
-                echo $OUTPUT->header();
-                notice(get_string('emailfederationconfirmsent', 'auth_federationmember', $federationemail), "$CFG->wwwroot/index.php");
-            } else {
-                return true;
-            }
+            $confirmationurl = new moodle_url('/auth/apoa/user_confirm.php', array('data' => "$user->secret/$user->username", 'federation' => $formattedfederation));
         }
-        $redirect =  new moodle_url('/local/memberships/index.php');
-        $confirmationurl = new moodle_url('/login/confirm.php', array('data' => "$user->secret/$user->username", 'redirect' => $redirect));
-        redirect($confirmationurl->out());
+        else{
+            $redirect =  new moodle_url('/local/landingpage/index.php');
+            $confirmationurl = new moodle_url('/auth/apoa/confirm.php', array('data' => "$user->secret/$user->username", 'redirect' => $redirect));
+        }
 
-        if (! send_confirmation_email($user, $confirmationurl)) {
+        if (! $this->send_confirmation_email($user, $confirmationurl)) {
             throw new \moodle_exception('auth_emailnoemail', 'auth_email');
         }
 
@@ -235,6 +221,8 @@ class auth_plugin_federationmember extends auth_plugin_email {
                 
                 $field = $DB->get_record_sql($sql, $params);
                 $DB->set_field("user_info_data", "data", 0, array("userid"=>$user->id, "fieldid" => $field->id));
+                
+                
 
                 if ($wantsurl = get_user_preferences('auth_email_wantsurl', false, $user)) {
                     // Ensure user gets returned to page they were trying to access before signing up.
@@ -248,47 +236,92 @@ class auth_plugin_federationmember extends auth_plugin_email {
             return AUTH_CONFIRM_ERROR;
         }
     }
+    /**
+ * Send email to specified user with confirmation text and activation link.
+ *
+ * @param stdClass $user A {@link $USER} object
+ * @param string $confirmationurl user confirmation URL
+ * @return bool Returns true if mail was sent OK and false if there was an error.
+ */
+function send_confirmation_email($user, $confirmationurl = null) {
+    global $CFG;
 
+    $site = get_site();
+    $supportuser = core_user::get_support_user();
 
-        /**
-     * Send email to specified user with confirmation text and activation link.
-     *
-     * @param stdClass $user A {@link $USER} object
-     * @param string $confirmationurl user confirmation URL
-     * @return bool Returns true if mail was sent OK and false if there was an error.
-     */
-    function federation_confirm_email_user($user, $confirmationurl = null) {
-        global $CFG;
+    $data = new stdClass();
+    $data->sitename  = format_string($site->fullname);
+    $data->admin     = generate_email_signoff();
 
-        $site = get_site();
-        $supportuser = core_user::get_support_user();
+    $subject = get_string('emailconfirmationsubject', '', format_string($site->fullname));
 
-        $data = new stdClass();
-        $data->sitename  = format_string($site->fullname);
-        $data->admin     = generate_email_signoff();
-
-        $subject = get_string('emailconfirmationsubject', '', format_string($site->fullname));
-
-        
-        // Remove data parameter just in case it was included in the confirmation so we can add it manually later.
-
-        // We need to custom encode the username to include trailing dots in the link.
-        // Because of this custom encoding we can't use moodle_url directly.
-        // Determine if a query string is present in the confirmation url.
-        // Perform normal url encoding of the username first.
-        $username = urlencode($user->username);
-        // Prevent problems with trailing dots not being included as part of link in some mail clients.
-        $username = str_replace('.', '%2E', $username);
-
-
-        $message     = get_string('emailconfirmation', '');
-        $messagehtml = text_to_html(get_string('emailconfirmation', ''), false, false, true);
-
-        // Directly email rather than using the messaging system to ensure its not routed to a popup or jabber.
-        return email_to_user($user, $supportuser, $subject, $message, $messagehtml);
+    if (empty($confirmationurl)) {
+        $confirmationurl = '/login/confirm.php';
     }
 
+    $confirmationurl = new moodle_url($confirmationurl);
+    // Remove data parameter just in case it was included in the confirmation so we can add it manually later.
+    $confirmationurl->remove_params('data');
+    $confirmationpath = $confirmationurl->out(false);
 
+    // We need to custom encode the username to include trailing dots in the link.
+    // Because of this custom encoding we can't use moodle_url directly.
+    // Determine if a query string is present in the confirmation url.
+    $hasquerystring = strpos($confirmationpath, '?') !== false;
+    // Perform normal url encoding of the username first.
+    $username = urlencode($user->username);
+    // Prevent problems with trailing dots not being included as part of link in some mail clients.
+    $username = str_replace('.', '%2E', $username);
+
+    $data->link = $confirmationpath . ( $hasquerystring ? '&' : '?') . 'data='. $user->secret .'/'. $username;
+
+    $message     = get_string('emailconfirmation', 'auth_apoa', $data);
+    $messagehtml = text_to_html(get_string('emailconfirmation', 'auth_apoa', $data), false, false, true);
+
+    // Directly email rather than using the messaging system to ensure its not routed to a popup or jabber.
+    return email_to_user($user, $supportuser, $subject, $message, $messagehtml);
+}
+
+    /**
+ * Send email to specified user with confirmation text and activation link.
+ *
+ * @param stdClass $user A {@link $USER} object
+ * @param string $confirmationurl user confirmation URL
+ * @return bool Returns true if mail was sent OK and false if there was an error.
+ */
+function send_federation_confirm_to_user($user) {
+    global $CFG;
+
+    $site = get_site();
+    $supportuser = core_user::get_support_user();
+
+    $data = new stdClass();
+    $data->sitename  = format_string($site->fullname);
+    $data->admin     = generate_email_signoff();
+
+    $subject = get_string('emailconfirmationfederationtousersubject', 'auth_apoa', format_string($site->fullname));
+
+    $confirmationurl = new moodle_url('/local/landingpage.php');
+    // Remove data parameter just in case it was included in the confirmation so we can add it manually later.
+    $confirmationurl->remove_params('data');
+    $confirmationpath = $confirmationurl->out(false);
+
+    $hasquerystring = strpos($confirmationpath, '?') !== false;
+
+    // Perform normal url encoding of the username first.
+    $username = urlencode($user->username);
+    // Prevent problems with trailing dots not being included as part of link in some mail clients.
+    $username = str_replace('.', '%2E', $username);
+
+    $data->link = $confirmationpath . ( $hasquerystring ? '&' : '?') . 'data='. $user->secret .'/'. $username;
+
+    $message     = get_string('emailconfirmationfederationtouser', 'auth_apoa', $data);
+    $messagehtml = text_to_html(get_string('emailconfirmationfederationtouser', 'auth_apoa', $data), false, false, true);
+
+    // Directly email rather than using the messaging system to ensure its not routed to a popup or jabber.
+    return email_to_user($user, $supportuser, $subject, $message, $messagehtml);
+}
+    
 
         /**
      * Send email to specified user with confirmation text and activation link.
@@ -297,7 +330,7 @@ class auth_plugin_federationmember extends auth_plugin_email {
      * @param string $confirmationurl user confirmation URL
      * @return bool Returns true if mail was sent OK and false if there was an error.
      */
-    function send_confirmation_email_to_federation($user, $federationemail, $confirmationurl = null) {
+    function send_confirmation_email_to_federation($user, $federation, $confirmationurl = null) {
         global $CFG;
 
         $site = get_site();
@@ -306,11 +339,15 @@ class auth_plugin_federationmember extends auth_plugin_email {
         $data = new stdClass();
         $data->sitename  = format_string($site->fullname);
         $data->admin     = generate_email_signoff();
+        $data->fullname  = fullname($user);
+        $subject = get_string('federationemailconfirmationsubject', 'auth_apoa', format_string($site->fullname));
 
-        $subject = get_string('emailconfirmationsubject', '', format_string($site->fullname));
+        if(!$federationemail = get_config('auth_apoa', 'federationemail'.$federation)){
+            throw new \moodle_exception('auth_emailnofederationemail', 'auth_apoa');
+        }
 
         if (empty($confirmationurl)) {
-            $confirmationurl = '/auth/federationmember/federation_confirm.php';
+            $confirmationurl = '/auth/apoa/federation_confirm.php';
         }
 
         $confirmationurl = new moodle_url($confirmationurl);
@@ -329,8 +366,8 @@ class auth_plugin_federationmember extends auth_plugin_email {
 
         $data->link = $confirmationpath . ( $hasquerystring ? '&' : '?') . 'data='. $user->secret .'/'. $username;
 
-        $message     = get_string('emailconfirmation', '', $data);
-        $messagehtml = text_to_html(get_string('emailconfirmation', '', $data), false, false, true);
+        $message     = get_string('federationemailconfirmation', '', $data);
+        $messagehtml = text_to_html(get_string('federationemailconfirmation', 'auth_apoa', $data), false, false, true);
 
         // Directly email rather than using the messaging system to ensure its not routed to a popup or jabber.
         return $this->email_to_federation($user, $federationemail, $supportuser, $subject, $message, $messagehtml);
@@ -732,6 +769,58 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
             echo '</pre>';
         }
         return false;
+        }
     }
-}
+
+    public function get_subscription_headers(){
+        global $DB;
+
+        $columns = $DB->get_columns('auth_apoa');
+        $unwantedcolumns = ['id', 'membershipnumber', 'email', 'membership_category', 'subscriptionends', 'lifemembership'];
+        foreach($unwantedcolumns as $unwanted){
+            unset($columns[$unwanted]);
+        };
+        return array_keys($columns);
+
+    }
+
+    public function enrol_existing_member($user){
+        global $DB, $PAGE;
+        $toenrolin = [];
+        if($authrecord = $DB->get_record('auth_apoa', array('email' => $user->email))){
+           $lifemember = $authrecord->lifemembership;
+           $subscriptionends = $authrecord->subscriptionends;
+           $apoasubscription = get_config('auth_apoa', 'subscriptionapoa');
+
+           if($lifemember){
+                $toenrolin[$apoasubscription]  = 0;
+           }
+           else if ($subscriptionends > time()){
+                $toenrolin[$apoasubscription] = $subscriptionends;
+           }
+            foreach($authrecord as $field => $value){
+                $subscription = get_config('auth_apoa', 'subscription' . $field);
+                if($subscription !== false){
+                    if($value){
+                        $toenrolin[$subscription] = 0;
+                    }
+                }  
+            }
+
+             foreach($toenrolin as $courseid => $enddate){
+                $plugin = enrol_get_plugin('manual');
+                $instances = enrol_get_instances($courseid, true);
+                foreach($instances as $instance){
+                    if($instance->enrol == 'manual'){
+                        break;
+                    }
+                }
+                if($instance){
+                    $plugin->enrol_user($instance, $user->id, 5, 0, $enddate);
+                }
+            }
+        }
+        
+        return false;
+    }
 }

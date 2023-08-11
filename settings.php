@@ -17,43 +17,69 @@
 /**
  * Admin settings and defaults.
  *
- * @package auth_federationmember
+ * @package auth_apoa
  * @copyright  2017 Stephen Bourget
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
 
+require_once($CFG->dirroot .'/local/subscriptions/lib.php');
+
 if ($ADMIN->fulltree) {
 
     // Introductory explanation.
-    $settings->add(new admin_setting_heading('auth_federationmember/pluginname', '',
-        new lang_string('auth_federationmemberdescription', 'auth_federationmember')));
+    $settings->add(new admin_setting_heading('auth_apoa/pluginname', '',
+        new lang_string('auth_apoadescription', 'auth_apoa')));
 
     $options = array(
         new lang_string('no'),
         new lang_string('yes'),
     );
 
-    $settings->add(new admin_setting_configselect('auth_federationmember/recaptcha',
-        new lang_string('auth_federationmemberrecaptcha_key', 'auth_federationmember'),
-        new lang_string('auth_federationmemberrecaptcha', 'auth_federationmember'), 0, $options));
+    $settings->add(new admin_setting_configselect('auth_apoa/recaptcha',
+        new lang_string('auth_apoarecaptcha_key', 'auth_apoa'),
+        new lang_string('auth_apoarecaptcha', 'auth_apoa'), 0, $options));
 
-    
-    // Display locking / mapping of profile fields.
-    $authplugin = get_auth_plugin('federationmember');
+
+    $authplugin = get_auth_plugin('apoa');
     display_auth_lock_options($settings, $authplugin->authtype, $authplugin->userfields,
             get_string('auth_fieldlocks_help', 'auth'), false, false);
 
+
+    $settings->add(new admin_setting_heading('auth_apoa/subscriptionmapping',  new lang_string('subscriptionmapping', 'auth_apoa'),
+            new lang_string('subscriptionmapping_desc', 'auth_apoa')));
+    
+    $columns = $authplugin->get_subscription_headers();
+    $subscriptions = get_subscription_courses();
+    $options = [];
+    foreach($subscriptions as $subscription){
+        $options[$subscription->id ] = $subscription->shortname; 
+    }
+    $context = context_system::instance();
+    $settings->add(new admin_setting_configselect('auth_apoa/subscriptionapoa', 'APOA', "", "", $options));
+    foreach($columns as $column){
+
+        $settings->add(new admin_setting_configselect('auth_apoa/subscription'. $column, $column, "", "", $options));
+
+    }
+
+    $settings->add(new admin_setting_heading('auth_apoa/federationemails',  new lang_string('federationemailsheader', 'auth_apoa'),
+        new lang_string('federationemails', 'auth_apoa')));
 
     $federationfield = $DB->get_record('user_info_field', array('shortname' => 'federation'));
     $federations = explode("\n", $federationfield->param1);
     foreach($federations as $federation){
         $formattedsetting = strtolower(preg_replace('/[^A-Za-z]/', '', $federation));
-        $settings->add(new admin_setting_configtext('auth_federationmember/federationemail' . $formattedsetting,
+        $settings->add(new admin_setting_configtext('auth_apoa/federationemail' . $formattedsetting,
             $federation,
-            new lang_string('auth_federationmemberfederationemail', 'auth_federationmember'),
+            new lang_string('auth_apoafederationemail', 'auth_apoa'),
             '',
             PARAM_EMAIL));
     }
+
+    
+    
+
+
 }
