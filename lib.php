@@ -30,14 +30,16 @@ function is_federation_pending(){
 
     $cache = \cache::make('auth_apoa', 'is_federation_pending_cache');
     
-    $cachekey = "u.$USER->id";
+    $cachekey = "u_$USER->id";
     if ($data = $cache->get($cachekey)){
         return $data['federation_pending'];
     }
     else{
         if($profile = profile_user_record($USER->id)){
             $federationpending = $profile->federation_pending == 1 ? True : False;
-            $cache->set($cachekey, array('federation_pending' => $federationpending));
+            if($federationpending){
+                $cache->set($cachekey, array('federation_pending' => $federationpending));
+            }
             return $federationpending;
         }
         

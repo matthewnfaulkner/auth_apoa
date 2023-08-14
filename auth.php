@@ -222,14 +222,18 @@ class auth_plugin_apoa extends auth_plugin_email {
                 $field = $DB->get_record_sql($sql, $params);
                 $DB->set_field("user_info_data", "data", 0, array("userid"=>$user->id, "fieldid" => $field->id));
                 
-                
+                $cache = \cache::make('auth_apoa', 'is_federation_pending_cache');
+
+                $cachekey = "u_$user->id";
+
+                $cache->delete($cachekey);
 
                 if ($wantsurl = get_user_preferences('auth_email_wantsurl', false, $user)) {
                     // Ensure user gets returned to page they were trying to access before signing up.
                     $SESSION->wantsurl = $wantsurl;
                     unset_user_preference('auth_email_wantsurl', $user);
                 }
-
+                
                 return AUTH_CONFIRM_OK;
             }
         } else {
@@ -301,7 +305,7 @@ function send_federation_confirm_to_user($user) {
 
     $subject = get_string('emailconfirmationfederationtousersubject', 'auth_apoa', format_string($site->fullname));
 
-    $confirmationurl = new moodle_url('/local/landingpage.php');
+    $confirmationurl = new moodle_url('/local/landingpage/index.php');
     // Remove data parameter just in case it was included in the confirmation so we can add it manually later.
     $confirmationurl->remove_params('data');
     $confirmationpath = $confirmationurl->out(false);
@@ -313,7 +317,8 @@ function send_federation_confirm_to_user($user) {
     // Prevent problems with trailing dots not being included as part of link in some mail clients.
     $username = str_replace('.', '%2E', $username);
 
-    $data->link = $confirmationpath . ( $hasquerystring ? '&' : '?') . 'data='. $user->secret .'/'. $username;
+    $data->link = $confirmationpath;
+    $data->username = $username;
 
     $message     = get_string('emailconfirmationfederationtouser', 'auth_apoa', $data);
     $messagehtml = text_to_html(get_string('emailconfirmationfederationtouser', 'auth_apoa', $data), false, false, true);

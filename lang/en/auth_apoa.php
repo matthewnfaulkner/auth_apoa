@@ -81,7 +81,7 @@ $string['federationemailconfirmsentsuccess'] = 'Federation confirmation email se
 $string['passwordagain'] = "Reenter password.";
 
 $string['emailconfirmationfederationtousersubject'] = 'Federation Membership Confirmation';
-$string['emailconfirmationfederationtouser'] = 'Hi {$a->fullname}, 
+$string['emailconfirmationfederationtouser'] = 'Hi {$a->username}, 
 
 your membership has been confirmed by your federation.
 
