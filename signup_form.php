@@ -148,7 +148,6 @@ class signup_form extends \login_signup_form {
                                          "$CFG->dirroot/$CFG->admin/tool/checkabletext/classes/checkabletext.php",
                                          'tool_checkabletext\MoodleQuickForm_checkabletext');
 
-            $mform->addElement('header', 'existinemailheader', get_string('existingemail', 'auth_apoa'));
             $mform->addElement('checkabletext', 'email', get_string('email'), 'maxlength="100" size="25"');
             $mform->setType('email', core_user::get_property_type('email'));
             $mform->addRule('email', get_string('missingemail'), 'required', null, 'server');
