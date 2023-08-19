@@ -154,6 +154,7 @@ class auth_plugin_apoa extends auth_plugin_email {
                 }
             }
         }
+        $user->profile_field_hasactivesubscription = 0;
         $user->id = user_create_user($user, false, false);
 
         user_add_password_history($user->id, $plainpassword);
