@@ -75,15 +75,6 @@ class signup_form extends \login_signup_form {
             ]);
             $mform->setType('password', core_user::get_property_type('password'));
             $mform->addRule('password', get_string('missingpassword'), 'required', null, 'client');
-            
-            $mform->addElement('password', 'password2', get_string('passwordagain', 'auth_apoa'), [
-                'maxlength' => 32,
-                'size' => 12,
-                'autocomplete' => 'new-password'
-            ]);
-
-            $mform->setType('password2', core_user::get_property_type('password'));
-            $mform->addRule('password2', get_string('passwordagain', 'auth_apoa'), 'required', null, 'client');
         
             $mform->addElement('text', 'email', get_string('email'), 'maxlength="100" size="25"');
             $mform->setType('email', core_user::get_property_type('email'));
@@ -214,14 +205,6 @@ class signup_form extends \login_signup_form {
             $mform->setType('password', core_user::get_property_type('password'));
             $mform->addRule('password', get_string('missingpassword'), 'required', null, 'client');
             
-            $mform->addElement('password', 'password2', get_string('passwordagain', 'auth_apoa'), [
-                'maxlength' => 32,
-                'size' => 12,
-                'autocomplete' => 'new-password'
-            ]);
-
-            $mform->setType('password2', core_user::get_property_type('password'));
-            $mform->addRule('password2', get_string('passwordagain', 'auth_apoa'), 'required', null, 'client');
 
             $mform->addElement('hidden', 'email2', get_string('emailagain'), 'maxlength="100" size="25"');
             $mform->setType('email2', core_user::get_property_type('email'));
@@ -314,14 +297,6 @@ class signup_form extends \login_signup_form {
             $mform->setType('password', core_user::get_property_type('password'));
             $mform->addRule('password', get_string('missingpassword'), 'required', null, 'client');
             
-            $mform->addElement('password', 'password2', get_string('passwordagain', 'auth_apoa'), [
-                'maxlength' => 32,
-                'size' => 12,
-                'autocomplete' => 'new-password'
-            ]);
-
-            $mform->setType('password2', core_user::get_property_type('password'));
-            $mform->addRule('password2', get_string('passwordagain', 'auth_apoa'), 'required', null, 'client');
 
             $mform->addElement('hidden', 'email2', get_string('emailagain'), 'maxlength="100" size="25"');
             $mform->setType('email2', core_user::get_property_type('email'));
@@ -419,9 +394,6 @@ class signup_form extends \login_signup_form {
             $errors = array_merge($errors, core_login_validate_extend_signup_form($data));
 
             
-            if ($data['password2'] != $data['password']) {
-                $errors['password2'] = get_string('passwordsdontmatch');
-            }
 
             $errors += signup_validate_data($data, $files);
         }

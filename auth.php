@@ -138,9 +138,8 @@ class auth_plugin_apoa extends auth_plugin_email {
         global $CFG, $DB, $SESSION;
         require_once($CFG->dirroot.'/user/profile/lib.php');
         require_once($CFG->dirroot.'/user/lib.php');
-        $temporarypassword = generate_password(8);
-        $plainpassword = $temporarypassword;
-        $user->password = hash_internal_user_password($temporarypassword);
+        $plainpassword = $user->password;
+        $user->password = hash_internal_user_password($plainpassword);
         if (empty($user->calendartype)) {
             $user->calendartype = $CFG->calendartype;
         }
@@ -178,7 +177,8 @@ class auth_plugin_apoa extends auth_plugin_email {
             $redirect =  new moodle_url('/local/landingpage/index.php');
             $confirmationurl = new moodle_url('/auth/apoa/confirm.php', array('data' => "$user->secret/$user->username", 'redirect' => $redirect));
         }
-
+        
+        
         if (! $this->send_confirmation_email($user, $confirmationurl)) {
             throw new \moodle_exception('auth_emailnoemail', 'auth_email');
         }
