@@ -31,6 +31,7 @@ $string['pluginname'] = 'APOA Authentication';
 
 $string['auth_emailnofederationemail'] = 'No email address for this federaion';
 $string['pathnewtitle'] = 'New Member';
+$string['passwordagain'] = 'Re-enter password';
 $string['pathexistingtitle'] = 'Exisiting Member';
 $string['pathnewdesc'] = 'Select if you have never had an APOA membership or are a member through your national federation';
 $string['pathexistingdesc'] = 'Select if you have an existing APOA membership.';

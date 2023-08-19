@@ -172,6 +172,7 @@ class auth_plugin_apoa extends auth_plugin_email {
 
         if($federationemail){
             $confirmationurl = new moodle_url('/auth/apoa/user_confirm.php', array('data' => "$user->secret/$user->username", 'federation' => $formattedfederation));
+
         }
         else{
             $redirect =  new moodle_url('/local/landingpage/index.php');
