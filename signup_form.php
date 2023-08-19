@@ -188,8 +188,9 @@ class signup_form extends \login_signup_form {
         global $CFG, $OUTPUT;
         $mform = $this->_form;
 
-        $mform->removeElement("existingemail");
-        $mform->removeElement("cancel");
+        if($mform->elementExists("buttonemail")){
+            $mform->removeElement("buttonemail");
+        }
 
         $mform->addElement('hidden', 'emailexists', 1);
         $mform->setType('id', PARAM_INT);
@@ -285,8 +286,10 @@ class signup_form extends \login_signup_form {
         global $CFG, $OUTPUT;
         $mform = $this->_form;
 
-        $mform->removeElement("existingemail");
-        $mform->removeElement("cancel");
+        if($mform->elementExists("buttonemail")){
+            $mform->removeElement("buttonemail");
+        }
+
 
         $mform->addElement('hidden', 'emailexists', 1);
         $mform->setType('id', PARAM_INT);
@@ -311,7 +314,7 @@ class signup_form extends \login_signup_form {
             $mform->setType('password', core_user::get_property_type('password'));
             $mform->addRule('password', get_string('missingpassword'), 'required', null, 'client');
             
-            $mform->addElement('password', 'password2', get_string('passwordagain', 'auth_apoa'), [
+            $mform->addElement('password', 'password2', get_string('passwordagain'), [
                 'maxlength' => 32,
                 'size' => 12,
                 'autocomplete' => 'new-password'
