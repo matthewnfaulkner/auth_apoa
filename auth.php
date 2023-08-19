@@ -814,8 +814,7 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
             }
             if($toenrolin){
                 $user->profile_field_hasactivesubscription = 1;
-                require_once($CFG->dirroot . '/user/profile/lib.php');
-                profile_save_data($updateuser);
+                profile_save_data($user);
             }
              foreach($toenrolin as $courseid => $enddate){
                 $plugin = enrol_get_plugin('manual');
