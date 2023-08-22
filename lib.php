@@ -45,3 +45,25 @@ function is_federation_pending(){
         
     }
 }
+
+function auth_apoa_user_created($event){
+    global $CFG;
+
+    $data = $event->get_data();
+    $userid = $data['objectid'];
+    $user = core_user::get_user($userid);
+    $supportuser = core_user::get_support_user();
+    $supportlink = new moodle_url($CFG->wwwroot . '/user/contactsitesupport.php');
+    $message = get_string('welcomemessage', 'auth_apoa', ['firstname' => $user->firstname, 'supportlink' => $supportlink->out()]);
+    \core_message\api::add_contact($user->id, $supportuser->id);
+    $conversation = \core_message\api::create_conversation(
+        \core_message\api::MESSAGE_CONVERSATION_TYPE_INDIVIDUAL,
+        [
+            $supportuser->id,
+            $user->id
+        ]
+    );
+
+    \core_message\api::set_favourite_conversation($conversation->id, $user->id);
+    message_post_message($supportuser, $user, $message, FORMAT_HTML);
+}
