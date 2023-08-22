@@ -24,6 +24,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot . '/message/lib.php');
+
+use \core_message\api as api;
+use \moodle_url as moodle_url;
+use \core_user as core_user;
 
 function is_federation_pending(){
     global $USER;
@@ -55,15 +60,15 @@ function auth_apoa_user_created($event){
     $supportuser = core_user::get_support_user();
     $supportlink = new moodle_url($CFG->wwwroot . '/user/contactsitesupport.php');
     $message = get_string('welcomemessage', 'auth_apoa', ['firstname' => $user->firstname, 'supportlink' => $supportlink->out()]);
-    \core_message\api::add_contact($user->id, $supportuser->id);
-    $conversation = \core_message\api::create_conversation(
-        \core_message\api::MESSAGE_CONVERSATION_TYPE_INDIVIDUAL,
+    api::add_contact($user->id, $supportuser->id);
+    $conversation = api::create_conversation(
+        api::MESSAGE_CONVERSATION_TYPE_INDIVIDUAL,
         [
             $supportuser->id,
             $user->id
         ]
     );
 
-    \core_message\api::set_favourite_conversation($conversation->id, $user->id);
+    api::set_favourite_conversation($conversation->id, $user->id);
     message_post_message($supportuser, $user, $message, FORMAT_HTML);
 }
