@@ -54,12 +54,26 @@ function is_federation_pending(){
 function auth_apoa_user_created($event){
     global $CFG;
 
+    
     $data = $event->get_data();
+    error_log(print_r( "starting log user created", true ));
+    error_log(print_r( $data, true ));
     $userid = $data['objectid'];
+    error_log(print_r( $userid, true ));
+
     $user = core_user::get_user($userid);
+    error_log(print_r( $user, true ));
+
     $supportuser = core_user::get_support_user();
+
+    error_log(print_r( $supportuser, true ));
+    error_log(print_r( $CFG->supportuserid, true ));
+
     $supportlink = new moodle_url($CFG->wwwroot . '/user/contactsitesupport.php');
     $message = get_string('welcomemessage', 'auth_apoa', ['firstname' => $user->firstname, 'supportlink' => $supportlink->out()]);
+
+    error_log(print_r( $message, true ));
+
     api::add_contact($user->id, $supportuser->id);
     $conversation = api::create_conversation(
         api::MESSAGE_CONVERSATION_TYPE_INDIVIDUAL,
@@ -70,5 +84,7 @@ function auth_apoa_user_created($event){
     );
 
     api::set_favourite_conversation($conversation->id, $user->id);
-    message_post_message($supportuser, $user, $message, FORMAT_HTML);
+    $messageid = message_post_message($supportuser, $user, $message, FORMAT_HTML);
+    error_log(print_r( $messageid, true ));
+
 }
