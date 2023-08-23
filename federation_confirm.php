@@ -75,7 +75,7 @@ if (!empty($data) || (!empty($p) && !empty($s))) {
         if (!$user = get_complete_user_data('username', $username)) {
             throw new \moodle_exception('cannotfinduser', '', '', s($username));
         }
-
+        send_welcome_message($user);
         $authplugin->send_federation_confirm_to_user($user);
 
         $PAGE->navbar->add(get_string("confirmed"));

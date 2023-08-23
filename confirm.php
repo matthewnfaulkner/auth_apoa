@@ -78,7 +78,7 @@ if (!empty($data) || (!empty($p) && !empty($s))) {
         if (!$user->suspended) {
 
             $authplugin->enrol_existing_member($user);
-
+            send_welcome_message($user);
             complete_user_login($user);
 
             \core\session\manager::apply_concurrent_login_limit($user->id, session_id());
