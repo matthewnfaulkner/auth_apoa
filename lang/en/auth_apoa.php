@@ -105,4 +105,4 @@ To confirm your new account, please click the link below.
 If you need help, please contact the site administrator,
 {$a->admin}';
 
-$string['welcomemessage'] = 'Hi {$a->firstname}, welcome to APOA online. I\'m site support if you have any issues feel free to ask them here. Or fill in this <a href="{$a->supportlink}">support form</a>';
+$string['welcomemessage'] = 'Hi {$a->firstname}, welcome to APOA online. I\'m site support if you have any issues feel free to ask them here. Or fill in this <a href="{$a->supportlink}" style="text-decoration: underline;">support form</a>';
