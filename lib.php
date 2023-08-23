@@ -53,10 +53,8 @@ function is_federation_pending(){
 
 function auth_apoa_user_created($event){
     global $CFG;
-
-    
     $data = $event->get_data();
-    $userid = $data['objectid'];
+    $userid = $data['relateduserid'];
     $user = core_user::get_user($userid);
     $supportuser = core_user::get_support_user();
     $supportlink = new moodle_url($CFG->wwwroot . '/user/contactsitesupport.php');
