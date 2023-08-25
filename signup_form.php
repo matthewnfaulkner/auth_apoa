@@ -115,7 +115,7 @@ class signup_form extends \login_signup_form {
             }
 
             profile_signup_fields($mform);
-
+            $mform->addHelpButton('profile_field_membership_category', 'membership_category', 'auth_apoa', 'What is this?');
             if (signup_captcha_enabled()) {
                 $mform->addElement('recaptcha', 'recaptcha_element', get_string('security_question', 'auth'));
                 $mform->addHelpButton('recaptcha_element', 'recaptcha', 'auth');
@@ -191,76 +191,82 @@ class signup_form extends \login_signup_form {
         $element->updateAttributes(array('readonly' => 'readonly', 'valid' => get_string('emailexists', 'auth_apoa')));
 
         $mform->addElement('text', 'username', get_string('username'), 'maxlength="100" size="12" autocapitalize="none"');
-            $mform->setType('username', PARAM_RAW);
-            $mform->addRule('username', get_string('missingusername'), 'required', null, 'client');
+        $mform->setType('username', PARAM_RAW);
+        $mform->addRule('username', get_string('missingusername'), 'required', null, 'client');
 
-            if (!empty($CFG->passwordpolicy)){
-                $mform->addElement('static', 'passwordpolicyinfo', '', print_password_policy());
+        if (!empty($CFG->passwordpolicy)){
+            $mform->addElement('static', 'passwordpolicyinfo', '', print_password_policy());
+        }
+        $mform->addElement('password', 'password', get_string('password'), [
+            'maxlength' => 32,
+            'size' => 12,
+            'autocomplete' => 'new-password'
+        ]);
+        $mform->setType('password', core_user::get_property_type('password'));
+        $mform->addRule('password', get_string('missingpassword'), 'required', null, 'client');
+        
+
+        $mform->addElement('hidden', 'email2', get_string('emailagain'), 'maxlength="100" size="25"');
+        $mform->setType('email2', core_user::get_property_type('email'));
+        $mform->addRule('email2', get_string('missingemail'), 'required', null, 'client');
+
+        $namefields = useredit_get_required_name_fields();
+        foreach ($namefields as $field) {
+            $mform->addElement('text', $field, get_string($field), 'maxlength="100" size="30"');
+            $mform->setType($field, core_user::get_property_type('firstname'));
+            $stringid = 'missing' . $field;
+            if (!get_string_manager()->string_exists($stringid, 'moodle')) {
+                $stringid = 'required';
             }
-            $mform->addElement('password', 'password', get_string('password'), [
-                'maxlength' => 32,
-                'size' => 12,
-                'autocomplete' => 'new-password'
-            ]);
-            $mform->setType('password', core_user::get_property_type('password'));
-            $mform->addRule('password', get_string('missingpassword'), 'required', null, 'client');
-            
+            $mform->addRule($field, get_string($stringid), 'required', null, 'client');
+        }
 
-            $mform->addElement('hidden', 'email2', get_string('emailagain'), 'maxlength="100" size="25"');
-            $mform->setType('email2', core_user::get_property_type('email'));
-            $mform->addRule('email2', get_string('missingemail'), 'required', null, 'client');
+        $mform->addElement('text', 'city', get_string('city'), 'maxlength="120" size="20"');
+        $mform->setType('city', core_user::get_property_type('city'));
+        if (!empty($CFG->defaultcity)) {
+            $mform->setDefault('city', $CFG->defaultcity);
+        }
 
-            $namefields = useredit_get_required_name_fields();
-            foreach ($namefields as $field) {
-                $mform->addElement('text', $field, get_string($field), 'maxlength="100" size="30"');
-                $mform->setType($field, core_user::get_property_type('firstname'));
-                $stringid = 'missing' . $field;
-                if (!get_string_manager()->string_exists($stringid, 'moodle')) {
-                    $stringid = 'required';
-                }
-                $mform->addRule($field, get_string($stringid), 'required', null, 'client');
-            }
+        $country = get_string_manager()->get_list_of_countries();
+        $default_country[''] = get_string('selectacountry');
+        $country = array_merge($default_country, $country);
+        $mform->addElement('select', 'country', get_string('country'), $country);
 
-            $mform->addElement('text', 'city', get_string('city'), 'maxlength="120" size="20"');
-            $mform->setType('city', core_user::get_property_type('city'));
-            if (!empty($CFG->defaultcity)) {
-                $mform->setDefault('city', $CFG->defaultcity);
-            }
+        if( !empty($CFG->country) ){
+            $mform->setDefault('country', $CFG->country);
+        }else{
+            $mform->setDefault('country', '');
+        }
 
-            $country = get_string_manager()->get_list_of_countries();
-            $default_country[''] = get_string('selectacountry');
-            $country = array_merge($default_country, $country);
-            $mform->addElement('select', 'country', get_string('country'), $country);
+        profile_signup_fields($mform);
+        $element = $mform->getElement("profile_field_membership_category");
+        $element->updateAttributes(array('style' => 'display: none;'));
+        $element->setHiddenLabel(true);
 
-            if( !empty($CFG->country) ){
-                $mform->setDefault('country', $CFG->country);
-            }else{
-                $mform->setDefault('country', '');
-            }
+        $mform->addElement('hidden', 'profile_field_membershipnumber');
 
-            profile_signup_fields($mform);
-            $element = $mform->getElement("profile_field_membership_category");
-            $element->updateAttributes(array('style' => 'display: none;'));
-            $element->setHiddenLabel(true);
+        
+        $element = $mform->getElement("profile_field_federation");
+        $element->updateAttributes(array('style' => 'display: none;'));
+        $element->setHiddenLabel(true);
+        
+        if (signup_captcha_enabled()) {
+            $mform->addElement('recaptcha', 'recaptcha_element', get_string('security_question', 'auth'));
+            $mform->addHelpButton('recaptcha_element', 'recaptcha', 'auth');
+            $mform->closeHeaderBefore('recaptcha_element');
+        }
 
-            
-            if (signup_captcha_enabled()) {
-                $mform->addElement('recaptcha', 'recaptcha_element', get_string('security_question', 'auth'));
-                $mform->addHelpButton('recaptcha_element', 'recaptcha', 'auth');
-                $mform->closeHeaderBefore('recaptcha_element');
-            }
+        // Hook for plugins to extend form definition.
+        core_login_extend_signup_form($mform);
 
-            // Hook for plugins to extend form definition.
-            core_login_extend_signup_form($mform);
+        // Add "Agree to sitepolicy" controls. By default it is a link to the policy text and a checkbox but
+        // it can be implemented differently in custom sitepolicy handlers.
+        $manager = new \core_privacy\local\sitepolicy\manager();
+        $manager->signup_form($mform);
 
-            // Add "Agree to sitepolicy" controls. By default it is a link to the policy text and a checkbox but
-            // it can be implemented differently in custom sitepolicy handlers.
-            $manager = new \core_privacy\local\sitepolicy\manager();
-            $manager->signup_form($mform);
-
-            // buttons
-            $this->set_display_vertical();
-            $this->add_action_buttons(true, get_string('createaccount'));
+        // buttons
+        $this->set_display_vertical();
+        $this->add_action_buttons(true, get_string('createaccount'));
 
 
     }
@@ -337,6 +343,15 @@ class signup_form extends \login_signup_form {
             $element->updateAttributes(array('style' => 'display: none;'));
             $element->setHiddenLabel(true);
 
+            $mform->addElement('hidden', 'profile_field_membershipnumber');
+            $mform->setDefault('profile_field_membershipnumber', $data['profile_field_membershipnumber']);
+
+            
+            $element = $mform->getElement("profile_field_federation");
+            $mform->setDefault('profile_field_membership_federation', $data['profile_field_federation']);
+            $element->updateAttributes(array('style' => 'display: none;'));
+            $element->setHiddenLabel(true);
+
             
             if (signup_captcha_enabled()) {
                 $mform->addElement('recaptcha', 'recaptcha_element', get_string('security_question', 'auth'));
@@ -374,15 +389,19 @@ class signup_form extends \login_signup_form {
             }
             $errors += signup_validate_data($data, $files);
             if(empty($errors['email'] && !$data['emailexists'])){
-                if($user = $this->validate_existing_email($data['email'])){
-                    $data['profile_field_membership_category'] = $user->membership_category;
-                    if(empty($errors['email'])){
-                        $this->add_default_signupelements($data);
+                    if($user = $this->validate_existing_email($data['email'])){
+                        $data['profile_field_membership_category'] = $user->membership_category;
+                        $data['profile_field_federation'] = country_to_federation($user->country);
+                        $data['profile_field_membershipnumber'] = $user->id;
+                        if(!$this->_customdata['emailexists']){
+                            if(empty($errors['email'])){
+                                $this->add_default_signupelements($data);
+                            }
+                        }
+                    }else{
+                        $errors['email'] = get_string('emaildoesnotexist' , 'auth_apoa');
+                        $this->_form->addElement('submit', 'makenewuser', get_string('makenewaccount', 'auth_apoa'));
                     }
-                }else{
-                    $errors['email'] = get_string('emaildoesnotexist' , 'auth_apoa');
-                    $this->_form->addElement('submit', 'makenewuser', get_string('makenewaccount', 'auth_apoa'));
-                }
             }
             $errors += parent::validation($data, $files);
 

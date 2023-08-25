@@ -27,6 +27,7 @@
  require(__DIR__ . '/../../config.php');
  require($CFG->dirroot . '/login/lib.php');
  require_once($CFG->libdir . '/authlib.php');
+ require_once('lib.php');
 
 $data = optional_param('data', '', PARAM_RAW);  // Formatted as:  secret/username
 

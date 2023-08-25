@@ -147,13 +147,14 @@ class auth_plugin_apoa extends auth_plugin_email {
         $membershipcategory = $user->profile_field_membership_category;
         if($membershipcategory == "Federation Fellow"){
             if($federation = $user->profile_field_federation){
-                $user->profile_field_federation_pending = 1;
                 $formattedfederation = strtolower(preg_replace('/[^A-Za-z]/', '', $federation));
                 if(!$federationemail = get_config('auth_apoa', 'federationemail'.$formattedfederation)){
                     throw new \moodle_exception('auth_emailnofederationemail', 'auth_apoa');
                 }
             }
         }
+
+        $user->profile_field_membership_category_approved = 0;
         $user->profile_field_hasactivesubscription = 0;
         $user->id = user_create_user($user, false, false);
 
@@ -164,6 +165,9 @@ class auth_plugin_apoa extends auth_plugin_email {
         
         // Save wantsurl against user's profile, so we can return them there upon confirmation.
         if (!empty($SESSION->wantsurl)) {
+            if($SESSION->wantsurl == $CFG->wwwroot . '/'){
+                $redirect = $redirect =  new moodle_url('/local/landingpage/index.php');
+            }
             set_user_preference('auth_email_wantsurl', $SESSION->wantsurl, $user);
         }
 
@@ -175,10 +179,8 @@ class auth_plugin_apoa extends auth_plugin_email {
 
         }
         else{
-            $redirect =  new moodle_url('/local/landingpage/index.php');
             $confirmationurl = new moodle_url('/auth/apoa/confirm.php', array('data' => "$user->secret/$user->username", 'redirect' => $redirect));
         }
-        
         
         if (! $this->send_confirmation_email($user, $confirmationurl)) {
             throw new \moodle_exception('auth_emailnoemail', 'auth_email');
@@ -211,20 +213,20 @@ class auth_plugin_apoa extends auth_plugin_email {
             if ($user->auth != $this->authtype) {
                 return AUTH_CONFIRM_ERROR;
 
-            } else if ($user->secret === $confirmsecret && !$user->profile['federation_pending']) {
+            } else if ($user->secret === $confirmsecret && $user->profile['membership_category_approved']) {
                 return AUTH_CONFIRM_ALREADY;
 
             } else if ($user->secret === $confirmsecret) {   // They have provided the secret key to get in
-                $user->profile['federation_pending'] = 0;
+                $user->profile['membership_category_approved'] = 1;
                 $sql = "SELECT uip.id 
                 FROM  {user_info_field} uip 
                 WHERE uip.shortname = :fieldname";
-                $params = array('fieldname' => 'federation_pending');
+                $params = array('fieldname' => 'membership_category_approved');
                 
                 $field = $DB->get_record_sql($sql, $params);
                 $DB->set_field("user_info_data", "data", 0, array("userid"=>$user->id, "fieldid" => $field->id));
                 
-                $cache = \cache::make('auth_apoa', 'is_federation_pending_cache');
+                $cache = \cache::make('auth_apoa', 'membership_category_approved_cache');
 
                 $cachekey = "u_$user->id";
 
@@ -783,7 +785,7 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
         global $DB;
 
         $columns = $DB->get_columns('auth_apoa');
-        $unwantedcolumns = ['id', 'membershipnumber', 'email', 'membership_category', 'subscriptionends', 'lifemembership'];
+        $unwantedcolumns = ['id', 'membershipnumber', 'email', 'membership_category', 'subscriptionends', 'lifemembership', 'country'];
         foreach($unwantedcolumns as $unwanted){
             unset($columns[$unwanted]);
         };
@@ -792,10 +794,11 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
     }
 
     public function enrol_existing_member($user){
-        global $DB, $PAGE;
+        global $DB;
         $toenrolin = [];
         if($authrecord = $DB->get_record('auth_apoa', array('email' => $user->email))){
            $lifemember = $authrecord->lifemembership;
+           $membershipcategory = $authrecord->membership_category;
            $subscriptionends = $authrecord->subscriptionends;
            $apoasubscription = get_config('auth_apoa', 'subscriptionapoa');
 
@@ -814,6 +817,9 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
                 }  
             }
             if($toenrolin){
+                if($membershipcategory != 'Federation Fellow'){
+                    $user->profile_field_membership_category_approved = 1;
+                }
                 $user->profile_field_hasactivesubscription = 1;
                 profile_save_data($user);
             }

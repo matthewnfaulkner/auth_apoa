@@ -38,7 +38,7 @@ function xmldb_auth_apoa_upgrade($oldversion) {
 
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2023062308) {
+    if ($oldversion < 2023062317) {
 
         // Define field membershipnumber to be added to auth_apoa.
         $table = new xmldb_table('auth_apoa');
@@ -170,8 +170,17 @@ function xmldb_auth_apoa_upgrade($oldversion) {
         }
 
 
+        // Define field country to be added to auth_apoa.
+        $table = new xmldb_table('auth_apoa');
+        $field = new xmldb_field('country', XMLDB_TYPE_CHAR, '50', null, null, null, null, 'email');
+
+        // Conditionally launch add field country.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
         // Apoa savepoint reached.
-        upgrade_plugin_savepoint(true, 2023062308, 'auth', 'apoa');
+        upgrade_plugin_savepoint(true, 2023062317, 'auth', 'apoa');
     }
 
 

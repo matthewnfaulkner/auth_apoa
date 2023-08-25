@@ -51,6 +51,57 @@ function is_federation_pending(){
     }
 }
 
+function is_membership_category_approved(){
+    global $USER;
+
+    $cache = \cache::make('auth_apoa', 'membership_category_approved_cache');
+    
+    $cachekey = "u_$USER->id";
+    if ($data = $cache->get($cachekey)){
+        return $data;
+    }
+    else{
+        if($profile = profile_user_record($USER->id)){
+            $membership_category_approved = $profile->membership_category_approved;
+            $membership_category = $profile->membership_category;
+            $membershipfields = array('membership_category_approved' => $membership_category_approved,
+                    'membership_category' => $membership_category);
+            $cache->set($cachekey, $membershipfields);
+            return $membershipfields;
+        }
+        
+    }
+}
+
+function country_to_federation($country){
+    $mapping = array('australia' => 'Australia',
+        'bangladesh' => 'Bangladesh',
+        'brunei' => 'Brunei',
+        'cambodia' => 'Cambodia',
+        'china' => 'China',
+        'hongkong' => 'Hong Kong',
+        'india' => 'India',
+        'indonesia' => 'Indonesia',
+        'japan' => 'Japan',
+        'korea' => 'Korea',
+        'malaysia' => 'Malaysia',
+        'myanmar' => 'Myanmar',
+        'nepal' => 'Nepal',
+        'oman' => 'Oman',
+        'pakistan' => 'Pakistan',
+        'philippines' => 'Philippines',
+        'saudiarabia' => 'Saudi Arabia',
+        'singapore' => 'Singapore',
+        'srilanka' => 'Sri Lanka',
+        'taiwan' => 'Taiwan',
+        'thailand' => 'Thailand',
+        'turkey' => 'Turkey',
+        'unitedarabemirates' => 'United Arab Emirates',
+        'vietnam' => 'Vietnam');
+
+    return $mapping[$country];
+}
+
 function send_welcome_message($to){
     global $CFG;
 
