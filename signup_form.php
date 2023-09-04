@@ -402,17 +402,6 @@ class signup_form extends \login_signup_form {
                         $errors['email'] = get_string('emaildoesnotexist' , 'auth_apoa');
                         $this->_form->addElement('submit', 'makenewuser', get_string('makenewaccount', 'auth_apoa'));
                     }
-                if (signup_captcha_enabled()) {
-                    $recaptchaelement = $this->_form->getElement('recaptcha_element');
-                    if (!empty($this->_form->_submitValues['g-recaptcha-response'])) {
-                        $response = $this->_form->_submitValues['g-recaptcha-response'];
-                        if (!$recaptchaelement->verify($response)) {
-                            $errors['recaptcha_element'] = get_string('incorrectpleasetryagain', 'auth');
-                        }
-                    } else {
-                        $errors['recaptcha_element'] = get_string('missingrecaptchachallengefield');
-                    }
-                }
             }
             $errors += parent::validation($data, $files);
 
@@ -426,18 +415,6 @@ class signup_form extends \login_signup_form {
             
 
             $errors += signup_validate_data($data, $files);
-
-            if (signup_captcha_enabled()) {
-                $recaptchaelement = $this->_form->getElement('recaptcha_element');
-                if (!empty($this->_form->_submitValues['g-recaptcha-response'])) {
-                    $response = $this->_form->_submitValues['g-recaptcha-response'];
-                    if (!$recaptchaelement->verify($response)) {
-                        $errors['recaptcha_element'] = get_string('incorrectpleasetryagain', 'auth');
-                    }
-                } else {
-                    $errors['recaptcha_element'] = get_string('missingrecaptchachallengefield');
-                }
-            }
         }
     
 
