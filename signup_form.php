@@ -403,7 +403,9 @@ class signup_form extends \login_signup_form {
                         $this->_form->addElement('submit', 'makenewuser', get_string('makenewaccount', 'auth_apoa'));
                     }
             }
-            $errors += parent::validation($data, $files);
+            if(!$errors){
+                $errors += parent::validation($data, $files);
+            }
 
         }
         else{
