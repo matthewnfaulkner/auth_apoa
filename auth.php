@@ -45,12 +45,15 @@ class auth_plugin_apoa extends auth_plugin_email {
     public bool $multipath;
 
     private array $paths;
+
+    private int $noemailmode;
     /**
      * Set the properties of the instance.
      */
     public function __construct() {
         $this->authtype = 'apoa';
         $this->multipath = True;
+        $this->noemailmode = get_config('auth_apoa', 'noemailmode');
         $this->paths = array(
                 'new' => array(
                     'path' => 0,
@@ -170,7 +173,7 @@ class auth_plugin_apoa extends auth_plugin_email {
             }
             set_user_preference('auth_email_wantsurl', $SESSION->wantsurl, $user);
         }
-
+        
         // Trigger event.
         \core\event\user_created::create_from_userid($user->id)->trigger();
 
@@ -181,7 +184,10 @@ class auth_plugin_apoa extends auth_plugin_email {
         else{
             $confirmationurl = new moodle_url('/auth/apoa/confirm.php', array('data' => "$user->secret/$user->username", 'redirect' => $redirect));
         }
-        //redirect($confirmationurl);
+
+        if($this->noemailmode){
+            redirect($confirmationurl);
+        }
         if (! $this->send_confirmation_email($user, $confirmationurl)) {
             throw new \moodle_exception('auth_emailnoemail', 'auth_email');
         }

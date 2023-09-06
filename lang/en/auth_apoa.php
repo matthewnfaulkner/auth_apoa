@@ -107,3 +107,5 @@ If you need help, please contact the site administrator,
 
 $string['welcomemessage'] = 'Hi {$a->firstname}, welcome to APOA online. I\'m site support if you have any issues feel free to ask them here. Or fill in this <a href="{$a->supportlink}" style="text-decoration: underline;">support form</a>';
 $string['membership_category_help'] = 'The category of your APOA membership. If you are unsure of your membership category or are not a member yet, select "No Membership". This can be updated later.';
+$string['noemailmode'] = "No Email Mode";
+$string['noemailmode_desc'] = "Confirmation Emails will no longer be sent but their responses will be simulated. Used for development";

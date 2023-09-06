@@ -41,6 +41,8 @@ if ($ADMIN->fulltree) {
         new lang_string('auth_apoarecaptcha_key', 'auth_apoa'),
         new lang_string('auth_apoarecaptcha', 'auth_apoa'), 0, $options));
 
+    $settings->add(new admin_setting_configcheckbox('auth_apoa/noemailmode', new lang_string('noemailmode', 'auth_apoa'),
+        new lang_string('noemailmode_desc', 'auth_apoa'), 0));
 
     $authplugin = get_auth_plugin('apoa');
     display_auth_lock_options($settings, $authplugin->authtype, $authplugin->userfields,
