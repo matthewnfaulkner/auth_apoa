@@ -184,7 +184,7 @@ class auth_plugin_apoa extends auth_plugin_email {
         else{
             $confirmationurl = new moodle_url('/auth/apoa/confirm.php', array('data' => "$user->secret/$user->username", 'redirect' => $redirect));
         }
-
+        
         if($this->noemailmode){
             redirect($confirmationurl);
         }
