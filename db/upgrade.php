@@ -183,6 +183,20 @@ function xmldb_auth_apoa_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023062317, 'auth', 'apoa');
     }
 
+    if ($oldversion < 2023062319) {
+
+        // Rename field osteoporosis on table auth_apoa to NEWNAMEGOESHERE.
+        $table = new xmldb_table('auth_apoa');
+        $field = new xmldb_field('osteoperosis', XMLDB_TYPE_INTEGER, '4', null, null, null, '0', 'research');
+
+        // Launch rename field osteoporosis.
+        $dbman->rename_field($table, $field, 'osteoporosis');
+
+        // Apoa savepoint reached.
+        upgrade_plugin_savepoint(true, 2023062319, 'auth', 'apoa');
+    }
+
+
 
     return true;
 }

@@ -26,6 +26,9 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot .'/local/subscriptions/lib.php');
 
+
+$ADMIN->add('accounts', new admin_externalpage('auth_addauthapoauser', get_string('pluginname', 'auth_apoa'), "$CFG->wwwroot/auth/apoa/addauthapoauser.php"));
+
 if ($ADMIN->fulltree) {
 
     // Introductory explanation.

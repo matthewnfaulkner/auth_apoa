@@ -823,7 +823,7 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
                 }  
             }
             if($toenrolin){
-                if($membershipcategory != 'Federation Fellow'){
+                if($membershipcategory != 'Federation Fellow' && $membershipcategory != 'Affiliate Federation Fellow'){
                     $user->profile_field_membership_category_approved = 1;
                 }
                 $user->profile_field_hasactivesubscription = 1;

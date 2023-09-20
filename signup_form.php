@@ -61,9 +61,14 @@ class signup_form extends \login_signup_form {
         $mform->setDefault('id', 0);
 
         if(!$this->path){
+
+            $mform->addElement('static', 'usernamepolicyinfo', '', get_string('usernamepolicy', 'auth_apoa'));
+
             $mform->addElement('text', 'username', get_string('username'), 'maxlength="100" size="12" autocapitalize="none"');
             $mform->setType('username', PARAM_RAW);
             $mform->addRule('username', get_string('missingusername'), 'required', null, 'client');
+
+            
 
             if (!empty($CFG->passwordpolicy)){
                 $mform->addElement('static', 'passwordpolicyinfo', '', print_password_policy());
@@ -190,6 +195,8 @@ class signup_form extends \login_signup_form {
         $element = $mform->getElement("email");
         $element->updateAttributes(array('readonly' => 'readonly', 'valid' => get_string('emailexists', 'auth_apoa')));
 
+        $mform->addElement('static', 'usernamepolicyinfo', '', get_string('usernamepolicy', 'auth_apoa'));
+
         $mform->addElement('text', 'username', get_string('username'), 'maxlength="100" size="12" autocapitalize="none"');
         $mform->setType('username', PARAM_RAW);
         $mform->addRule('username', get_string('missingusername'), 'required', null, 'client');
@@ -238,17 +245,7 @@ class signup_form extends \login_signup_form {
             $mform->setDefault('country', '');
         }
 
-        profile_signup_fields($mform);
-        $element = $mform->getElement("profile_field_membership_category");
-        $element->updateAttributes(array('style' => 'display: none;'));
-        $element->setHiddenLabel(true);
-
-        $mform->addElement('hidden', 'profile_field_membershipnumber');
-
-        
-        $element = $mform->getElement("profile_field_federation");
-        $element->updateAttributes(array('style' => 'display: none;'));
-        $element->setHiddenLabel(true);
+        $this->profile_signup_fields_existing($mform, []);
         
         if (signup_captcha_enabled()) {
             $mform->addElement('recaptcha', 'recaptcha_element', get_string('security_question', 'auth'));
@@ -288,6 +285,8 @@ class signup_form extends \login_signup_form {
         $mform->setDefault('email', $data['email']);
         $element->updateAttributes(array('readonly' => 'readonly', 'valid' => get_string('emailexists', 'auth_apoa')));
 
+        $mform->addElement('static', 'usernamepolicyinfo', '', get_string('usernamepolicy', 'auth_apoa'));
+        
         $mform->addElement('text', 'username', get_string('username'), 'maxlength="100" size="12" autocapitalize="none"');
         $mform->setType('username', PARAM_RAW);
         $mform->addRule('username', get_string('missingusername'), 'required', null, 'client');
@@ -337,20 +336,8 @@ class signup_form extends \login_signup_form {
             $mform->setDefault('country', '');
         }
 
-        profile_signup_fields($mform);
-        $element = $mform->getElement("profile_field_membership_category");
-        $mform->setDefault('profile_field_membership_category', $data['profile_field_membership_category']);
-        $element->updateAttributes(array('style' => 'display: none;'));
-        $element->setHiddenLabel(true);
+        $this->profile_signup_fields_existing($mform, $data);
 
-        $mform->addElement('hidden', 'profile_field_membershipnumber');
-        $mform->setDefault('profile_field_membershipnumber', $data['profile_field_membershipnumber']);
-
-        
-        $element = $mform->getElement("profile_field_federation");
-        $mform->setDefault('profile_field_membership_federation', $data['profile_field_federation']);
-        $element->updateAttributes(array('style' => 'display: none;'));
-        $element->setHiddenLabel(true);
 
         
         if (signup_captcha_enabled()) {
@@ -371,6 +358,49 @@ class signup_form extends \login_signup_form {
         $this->set_display_vertical();
         $this->add_action_buttons(true, get_string('createaccount'));
     
+    }
+
+    function profile_signup_fields_existing(\MoodleQuickForm $mform, $data): void {
+        if ($fields = $this->profile_get_signup_fields_existing()) {
+            foreach ($fields as $field) {
+                // Check if we change the categories.
+                if (!isset($currentcat) || $currentcat != $field->categoryid) {
+                     $currentcat = $field->categoryid;
+                     //$mform->addElement('header', 'category_'.$field->categoryid, format_string($field->categoryname));
+                }
+                if($field->categoryname == 'Membership'){
+                    $mform->addElement('hidden', $field->object->inputname);
+                    $mform->setDefault($field->object->inputname, $data[$field->object->inputname]);
+                }
+                else{
+                    $field->object->edit_field($mform);
+                }
+            }
+        }
+    }
+
+        /**
+     * Retrieves a list of profile fields that must be displayed in the sign-up form.
+     *
+     * @return array list of profile fields info
+     * @since Moodle 3.2
+     */
+    function profile_get_signup_fields_existing(): array {
+        $profilefields = array();
+        $fieldobjects = profile_get_user_fields_with_data(0);
+        foreach ($fieldobjects as $fieldobject) {
+            $field = (object)$fieldobject->get_field_config_for_external();
+            if ($fieldobject->get_category_name() !== null) {
+                $profilefields[] = (object) array(
+                    'categoryid' => $field->categoryid,
+                    'categoryname' => $fieldobject->get_category_name(),
+                    'fieldid' => $field->id,
+                    'datatype' => $field->datatype,
+                    'object' => $fieldobject
+                );
+            }
+        }
+        return $profilefields;
     }
     /**
      * Validate user supplied data on the signup form.
@@ -445,6 +475,17 @@ class signup_form extends \login_signup_form {
     public function validate_existing_email($email){
         global $DB;
         if($authrecord =  $DB->get_record('auth_apoa', array('email' => $email))){
+            if($authrecord->membership_category == 'Federation' || $authrecord->membership_category == 'Federation Fellow'){
+                if(country_to_federation($authrecord->country)){
+                    $authrecord->membership_category = 'Federation Fellow';
+                }
+                else{
+                    $authrecord->membership_category = 'Affiliate Federation Fellow';
+                }
+            }
+            if($authrecord->membership_category == 'Paramedical / Affiliate Member'){
+                $authrecord->membership_category = 'Affiliate Member';
+            }
             return $authrecord;
         };
         return false;
