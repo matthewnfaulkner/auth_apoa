@@ -791,7 +791,7 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
         global $DB;
 
         $columns = $DB->get_columns('auth_apoa');
-        $unwantedcolumns = ['id', 'membershipnumber', 'email', 'membership_category', 'subscriptionends', 'lifemembership', 'country'];
+        $unwantedcolumns = ['id', 'membershipnumber', 'email', 'membership_category', 'subscriptionends', 'lifemembership', 'country', 'apssnumber'];
         foreach($unwantedcolumns as $unwanted){
             unset($columns[$unwanted]);
         };

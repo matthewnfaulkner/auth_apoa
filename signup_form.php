@@ -421,7 +421,9 @@ class signup_form extends \login_signup_form {
             if(empty($errors['email'] && !$data['emailexists'])){
                     if($user = $this->validate_existing_email($data['email'])){
                         $data['profile_field_membership_category'] = $user->membership_category;
-                        $data['profile_field_federation'] = country_to_federation($user->country);
+                        if($user->membership_category == 'Federation Fellow' || $user->membership_category == 'Affiliate Federation Fellow'){
+                            $data['profile_field_federation'] = country_to_federation($user->country);
+                        }
                         $data['profile_field_membershipnumber'] = $user->id;
                         if(!$this->_customdata['emailexists']){
                             if(empty($errors['email'])){

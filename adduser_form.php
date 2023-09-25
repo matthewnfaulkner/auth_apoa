@@ -40,11 +40,6 @@ class auth_apoa_adduser_form extends moodleform {
 
         $mform->addElement('header', 'adduserheader', get_string('adduserheader', 'auth_apoa'));
 
-
-        $mform->addElement('text', 'membershipnumber', get_string('membershipnumber','auth_apoa'), PARAM_TEXT);
-        $mform->addRule('membershipnumber', '', 'required');
-        
-
         $mform->addElement('text', 'email', get_string('email'), 'maxlength="100" size="25"');
         $mform->setType('email', core_user::get_property_type('email'));
         $mform->addRule('email', get_string('missingemail'), 'required', null, 'client');
@@ -53,8 +48,11 @@ class auth_apoa_adduser_form extends moodleform {
 
         profile_signup_fields($mform);
 
+        $mform->addElement('text', 'membershipnumber', get_string('membershipnumber','auth_apoa'), PARAM_TEXT);
+        $mform->addRule('membershipnumber', '', 'required');
+
         $mform->addElement('date_time_selector', 'subscriptionends', get_string('subscriptionend', 'auth_apoa'), array('optional' => true));
-        $mform->addHelpButton('subscriptionends', 'limitstart');
+        $mform->addHelpButton('subscriptionends', 'subscriptionend');
 
         $options =[
             'footandankle' => 'Foot & Ankle',
@@ -72,6 +70,7 @@ class auth_apoa_adduser_form extends moodleform {
         ];
         $mform->addElement('select', 'subsections', get_string('subsections', 'auth_apoa'), $options, array('multiple' => true));
 
+        $mform->addElement('text', 'spinemembershipnumber', get_string('spinemembershipnumber','auth_apoa'), PARAM_TEXT);
 
         $this->add_action_buttons(false, get_string('adduser', 'auth_apoa'));
     }
@@ -87,8 +86,18 @@ class auth_apoa_adduser_form extends moodleform {
             $errors['email'] = "User with this email already exists";
         }
         $membershipnumber  = preg_replace("/[^0-9]/", "", $data['membershipnumber']);
-        if($DB->record_exists('auth_apoa', array('id' => $membershipnumber))){
+        if($DB->record_exists('auth_apoa', array('membershipnumber' => $membershipnumber))){
             $errors['membershipnumber'] = "User with this membership number already exists";
+        }
+        
+        if($DB->record_exists('auth_apoa', array('membershipnumber' => $data['membershipnumber']))){
+            $errors['membershipnumber'] = "User with this membership number already exists";
+        }
+        if(in_array('spine', $data['subsections'])){
+            $membershipnumber  = preg_replace("/[^0-9]/", "", $data['apssnumber']);
+            if($DB->record_exists('auth_apoa', array('apssnumber' => $membershipnumber))){
+                $errors['spinemembershipnumber'] = "User with this APSS membership number already exists";
+            }
         }
 
         return $errors;

@@ -38,7 +38,7 @@ echo $OUTPUT->header();
 if($formdata = $mform->get_data()){
     if(addauthapoauser($formdata)){
         echo $OUTPUT->heading(get_string('uploadusersresult', 'tool_uploaduser'));
-
+        echo $OUTPUT->notify_success(get_string('useraddedsuccessfully', 'auth_apoa'));
         echo $OUTPUT->single_button("$CFG->wwwroot/auth/apoa/addauthapoauser.php", 'Back');
         echo $OUTPUT->footer();
 

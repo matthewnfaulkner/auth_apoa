@@ -196,6 +196,21 @@ function xmldb_auth_apoa_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023062319, 'auth', 'apoa');
     }
 
+    if ($oldversion < 2023062320) {
+
+        // Define field apssnumber to be added to auth_apoa.
+        $table = new xmldb_table('auth_apoa');
+        $field = new xmldb_field('apssnumber', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'waves');
+
+        // Conditionally launch add field apssnumber.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Apoa savepoint reached.
+        upgrade_plugin_savepoint(true, 2023062320, 'auth', 'apoa');
+    }
+
 
 
     return true;

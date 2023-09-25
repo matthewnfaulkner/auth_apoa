@@ -110,3 +110,12 @@ $string['membership_category_help'] = 'The category of your APOA membership. If 
 $string['noemailmode'] = "No Email Mode";
 $string['noemailmode_desc'] = "Confirmation Emails will no longer be sent but their responses will be simulated. Used for development";
 $string['usernamepolicy'] = "Usernames must be all lowercase with no special characters.";
+
+
+$string['adduserheader'] = 'User Details';
+$string['adduser'] = 'Add User';
+$string['subscriptionend'] = 'Date of end of subscription';
+$string['subscriptionend_help'] = 'Enter the date when the subscription is due to run out. Leave disbaled if subscription is for lifetime';
+$string['subsections'] = 'Subsection subscriptions';
+$string['spinemembershipnumber'] = 'Membership Number to Spine Section, if applicable';
+$string['membershipnumber'] = 'APOA Membership Number';
