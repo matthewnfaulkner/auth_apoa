@@ -807,7 +807,6 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
            $membershipcategory = $authrecord->membership_category;
            $subscriptionends = $authrecord->subscriptionends;
            $apoasubscription = get_config('auth_apoa', 'subscriptionapoa');
-
            if($lifemember){
                 $toenrolin[$apoasubscription]  = 0;
            }
@@ -816,9 +815,13 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
            }
             foreach($authrecord as $field => $value){
                 $subscription = get_config('auth_apoa', 'subscription' . $field);
+                $enrolmentperiod = 0;
+                if($field == 'spine'){
+                    $enrolmentperiod = YEARSECS;
+                }
                 if($subscription !== false){
                     if($value){
-                        $toenrolin[$subscription] = 0;
+                        $toenrolin[$subscription] = $enrolmentperiod;
                     }
                 }  
             }
