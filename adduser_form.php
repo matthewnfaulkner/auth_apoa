@@ -112,8 +112,8 @@ class auth_apoa_adduser_form extends moodleform {
             $errors['membershipnumber'] = "User with this membership number already exists";
         }
         if(in_array('spine', $data['subsections'])){
-            $membershipnumber  = preg_replace("/[^0-9]/", "", $data['apssnumber']);
-            if($DB->record_exists('auth_apoa', array('apssnumber' => $membershipnumber))){
+            $spinemembershipnumber  = preg_replace("/[^0-9]/", "", $data['apssnumber']);
+            if($DB->record_exists('auth_apoa', array('apssnumber' => $spinemembershipnumber))){
                 $errors['spinemembershipnumber'] = "User with this APSS membership number already exists";
             }
         }
