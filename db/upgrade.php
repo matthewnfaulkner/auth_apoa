@@ -212,6 +212,21 @@ function xmldb_auth_apoa_upgrade($oldversion) {
     }
 
 
+    if ($oldversion < 2023062321) {
+
+        // Define field membershipnumberraw to be added to auth_apoa.
+        $table = new xmldb_table('auth_apoa');
+        $field = new xmldb_field('membershipnumberraw', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'apssnumber');
+
+        // Conditionally launch add field membershipnumberraw.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Apoa savepoint reached.
+        upgrade_plugin_savepoint(true, 2023062321, 'auth', 'apoa');
+    }
+
 
     return true;
 }

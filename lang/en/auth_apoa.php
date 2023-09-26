@@ -119,3 +119,5 @@ $string['subscriptionend_help'] = 'Enter the date when the subscription is due t
 $string['subsections'] = 'Subsection subscriptions';
 $string['spinemembershipnumber'] = 'Membership Number to Spine Section, if applicable';
 $string['membershipnumber'] = 'APOA Membership Number';
+$string['maxspinemembershipnumber'] = 'Current Highest APSS Membership Number';
+$string['maxmembershipnumber'] = 'Current Highest APOA Membership Number';

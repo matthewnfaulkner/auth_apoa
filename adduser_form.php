@@ -51,9 +51,18 @@ class auth_apoa_adduser_form extends moodleform {
         $mform->addElement('text', 'membershipnumber', get_string('membershipnumber','auth_apoa'), PARAM_TEXT);
         $mform->addRule('membershipnumber', '', 'required');
 
+        $maxapoa = get_max_apoa_number('membershipnumberraw');
+        $maxsubscription = get_max_subscriptions_users_number(get_config('auth_apoa', 'subscriptionapoa'));
+
+        $max = max($maxapoa, $maxsubscription);
+
+        $max = $maxsubscription->prefix . $max;
+
+        $mform->addElement('static', 'maxmembershipnumber', get_string('maxmembershipnumber', 'auth_apoa'), $max);
         $mform->addElement('date_time_selector', 'subscriptionends', get_string('subscriptionend', 'auth_apoa'), array('optional' => true));
         $mform->addHelpButton('subscriptionends', 'subscriptionend');
 
+        
         $options =[
             'footandankle' => 'Foot & Ankle',
             'handandupperlimb' => 'Hand & Upper Limb',
@@ -71,6 +80,15 @@ class auth_apoa_adduser_form extends moodleform {
         $mform->addElement('select', 'subsections', get_string('subsections', 'auth_apoa'), $options, array('multiple' => true));
 
         $mform->addElement('text', 'spinemembershipnumber', get_string('spinemembershipnumber','auth_apoa'), PARAM_TEXT);
+
+        $maxapoaspine = get_max_apoa_number('apssnumber');
+        $maxspinesubscription = get_max_subscriptions_users_number(get_config('auth_apoa', 'subscriptionspine'));
+
+        $max = max($maxapoaspine, $maxspinesubscription);
+
+        $max = $maxspinesubscription->prefix . $max;
+
+        $mform->addElement('static', 'maxmembershipnumber', get_string('maxspinemembershipnumber', 'auth_apoa'), $max);
 
         $this->add_action_buttons(false, get_string('adduser', 'auth_apoa'));
     }

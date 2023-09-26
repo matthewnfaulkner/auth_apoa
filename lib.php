@@ -136,7 +136,7 @@ function addauthapoauser($formdata){
 
     $newuser = new stdClass;
     $newuser->membershipnumber = $formdata->membershipnumber;
-    $newuser->id  = preg_replace("/[^0-9]/", "", $formdata->membershipnumber);
+    $newuser->membershipnumberraw = preg_replace("/[^0-9]/", "", $formdata->membershipnumber);
     $newuser->membership_category = $formdata->profile_field_membership_category;
     if($newuser->membership_category == 'Life Fellow' || $newuser->membership_category == 'Honorary Fellow'){
         $newuser->lifemembership = 1;
