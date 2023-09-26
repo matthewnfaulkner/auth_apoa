@@ -150,6 +150,6 @@ function addauthapoauser($formdata){
         $newuser->$subsection = 1;
     }
 
-    return $DB->import_record('auth_apoa', $newuser);
+    return $DB->insert_record('auth_apoa', $newuser);
 
 }
