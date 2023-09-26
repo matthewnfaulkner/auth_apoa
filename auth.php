@@ -817,7 +817,7 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
                 $subscription = get_config('auth_apoa', 'subscription' . $field);
                 $enrolmentperiod = 0;
                 if($field == 'spine'){
-                    $enrolmentperiod = YEARSECS;
+                    $enrolmentperiod = time() + YEARSECS;
                 }
                 if($subscription !== false){
                     if($value){
@@ -841,7 +841,7 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
                     }
                 }
                 if($instance){
-                    $plugin->enrol_user($instance, $user->id, 5, 0, $enddate);
+                    $plugin->enrol_user($instance, $user->id, 5, 0, $enddate, ENROL_USER_ACTIVE);
                 }
             }
         }

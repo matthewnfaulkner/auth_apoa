@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once $CFG->libdir.'/formslib.php';
 require_once($CFG->dirroot . '/user/editlib.php');
-
+require_once($CFG->dirroot . '/local/subscriptions/lib.php');
 /**
  * Upload a file CVS file with user information.
  *
@@ -54,7 +54,7 @@ class auth_apoa_adduser_form extends moodleform {
         $maxapoa = get_max_apoa_number('membershipnumberraw');
         $maxsubscription = get_max_subscriptions_users_number(get_config('auth_apoa', 'subscriptionapoa'));
 
-        $max = max($maxapoa, $maxsubscription);
+        $max = max($maxapoa->maxval, $maxsubscription->membership_number);
 
         $max = $maxsubscription->prefix . $max;
 
@@ -84,7 +84,7 @@ class auth_apoa_adduser_form extends moodleform {
         $maxapoaspine = get_max_apoa_number('apssnumber');
         $maxspinesubscription = get_max_subscriptions_users_number(get_config('auth_apoa', 'subscriptionspine'));
 
-        $max = max($maxapoaspine, $maxspinesubscription);
+        $max = max($maxapoaspine->maxval, $maxspinesubscription->membership_number);
 
         $max = $maxspinesubscription->prefix . $max;
 
