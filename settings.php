@@ -26,9 +26,6 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot .'/local/subscriptions/lib.php');
 
-
-$ADMIN->add('accounts', new admin_externalpage('auth_addauthapoauser', get_string('pluginname', 'auth_apoa'), "$CFG->wwwroot/auth/apoa/addauthapoauser.php"));
-
 if ($ADMIN->fulltree) {
 
     // Introductory explanation.
@@ -59,7 +56,7 @@ if ($ADMIN->fulltree) {
     $subscriptions = get_subscription_courses();
     $options = [];
     foreach($subscriptions as $subscription){
-        $options[$subscription->id ] = $subscription->shortname; 
+        $options[$subscription->id] = $subscription->shortname; 
     }
     $context = context_system::instance();
     $settings->add(new admin_setting_configselect('auth_apoa/subscriptionapoa', 'APOA', "", "", $options));

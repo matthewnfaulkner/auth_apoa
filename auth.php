@@ -791,7 +791,9 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
         global $DB;
 
         $columns = $DB->get_columns('auth_apoa');
-        $unwantedcolumns = ['id', 'membershipnumber', 'email', 'membership_category', 'subscriptionends', 'lifemembership', 'country', 'apssnumber', 'membershipnumberraw'];
+        $unwantedcolumns = ['id', 'membershipnumber', 'email', 'membership_category', 'subscriptionends', 
+        'lifemembership', 'country', 'apssnumber', 'membershipnumberraw', 'status',
+        'title', 'firstname', 'lastname', 'address', 'state', 'postcode', 'phone', 'fax', 'institution'];
         foreach($unwantedcolumns as $unwanted){
             unset($columns[$unwanted]);
         };
@@ -802,7 +804,7 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
     public function enrol_existing_member($user){
         global $DB;
         $toenrolin = [];
-        if($authrecord = $DB->get_record('auth_apoa', array('email' => $user->email))){
+        if($authrecord = $DB->get_record('auth_apoa', array('email' => $user->email, 'status' => 1))){
            $lifemember = $authrecord->lifemembership;
            $membershipcategory = $authrecord->membership_category;
            $subscriptionends = $authrecord->subscriptionends;

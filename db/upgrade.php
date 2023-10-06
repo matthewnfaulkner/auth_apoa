@@ -227,6 +227,93 @@ function xmldb_auth_apoa_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023062321, 'auth', 'apoa');
     }
 
+    if ($oldversion < 2023062322) {
+
+        // Define field status to be added to auth_apoa.
+        $table = new xmldb_table('auth_apoa');
+        $field = new xmldb_field('status', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'membershipnumberraw');
+
+        // Conditionally launch add field status.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Apoa savepoint reached.
+        upgrade_plugin_savepoint(true, 2023062322, 'auth', 'apoa');
+    }
+
+    if ($oldversion < 2023062323) {
+
+        // Define field title to be added to auth_apoa.
+        $table = new xmldb_table('auth_apoa');
+        $field = new xmldb_field('title', XMLDB_TYPE_CHAR, '10', null, null, null, null, 'status');
+
+        // Conditionally launch add field title.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('firstname', XMLDB_TYPE_CHAR, '45', null, null, null, null, 'title');
+
+        // Conditionally launch add field firstname.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+
+        $field = new xmldb_field('lastname', XMLDB_TYPE_CHAR, '45', null, null, null, null, 'firstname');
+
+        // Conditionally launch add field lastname.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('address', XMLDB_TYPE_CHAR, '512', null, null, null, null, 'lastname');
+
+        // Conditionally launch add field address.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('state', XMLDB_TYPE_CHAR, '100', null, null, null, null, 'address');
+
+        // Conditionally launch add field state.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('postcode', XMLDB_TYPE_CHAR, '45', null, null, null, null, 'state');
+
+        // Conditionally launch add field postcode.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('phone', XMLDB_TYPE_CHAR, '45', null, null, null, null, 'postcode');
+
+        // Conditionally launch add field phone.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+
+        $field = new xmldb_field('fax', XMLDB_TYPE_CHAR, '45', null, null, null, null, 'phone');
+
+        // Conditionally launch add field fax.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('institution', XMLDB_TYPE_CHAR, '256', null, null, null, null, 'fax');
+
+        // Conditionally launch add field institution.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Apoa savepoint reached.
+        upgrade_plugin_savepoint(true, 2023062323, 'auth', 'apoa');
+    }
+
 
     return true;
 }

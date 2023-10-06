@@ -102,6 +102,10 @@ class signup_form extends \login_signup_form {
                 $mform->addRule($field, get_string($stringid), 'required', null, 'client');
             }
 
+            $mform->addElement('text', 'institution', get_string('institution'), 'maxlength="255" size="25"');
+            $mform->setType('institution', core_user::get_property_type('institution'));
+            $mform->addRule('institution', '', 'required');
+
             $mform->addElement('text', 'city', get_string('city'), 'maxlength="120" size="20"');
             $mform->setType('city', core_user::get_property_type('city'));
             if (!empty($CFG->defaultcity)) {
@@ -228,6 +232,10 @@ class signup_form extends \login_signup_form {
             $mform->addRule($field, get_string($stringid), 'required', null, 'client');
         }
 
+        $mform->addElement('text', 'institution', get_string('institution'), 'maxlength="255" size="25"');
+        $mform->setType('institution', core_user::get_property_type('institution'));
+        $mform->addRule('institution', '', 'required');
+
         $mform->addElement('text', 'city', get_string('city'), 'maxlength="120" size="20"');
         $mform->setType('city', core_user::get_property_type('city'));
         if (!empty($CFG->defaultcity)) {
@@ -318,6 +326,10 @@ class signup_form extends \login_signup_form {
             }
             $mform->addRule($field, get_string($stringid), 'required', null, 'client');
         }
+
+        $mform->addElement('text', 'institution', get_string('institution'), 'maxlength="255" size="25"');
+        $mform->setType('institution', core_user::get_property_type('institution'));
+        $mform->addRule('institution', '', 'required');
 
         $mform->addElement('text', 'city', get_string('city'), 'maxlength="120" size="20"');
         $mform->setType('city', core_user::get_property_type('city'));

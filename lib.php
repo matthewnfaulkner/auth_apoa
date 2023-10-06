@@ -131,26 +131,4 @@ function auth_apoa_user_created($event){
 }
 
 
-function addauthapoauser($formdata){
-    global $DB;
 
-    $newuser = new stdClass;
-    $newuser->membershipnumber = $formdata->membershipnumber;
-    $newuser->membershipnumberraw = preg_replace("/[^0-9]/", "", $formdata->membershipnumber);
-    $newuser->membership_category = $formdata->profile_field_membership_category;
-    $newuser->apssnumber = $formdata->spinemembershipnumber;
-    if($newuser->membership_category == 'Life Fellow' || $newuser->membership_category == 'Honorary Fellow'){
-        $newuser->lifemembership = 1;
-    }
-    $newuser->email = $formdata->email;
-    $newuser->subscriptionends = $formdata->subscriptionends;
-    if($newuser->membership_category == 'Federation Fellow' || $newuser->membership_category == 'Affiliate Federation Fellow' ){
-        $newuser->country = $formdata->profile_field_federation;
-    }
-    foreach($formdata->subsections as $subsection){
-        $newuser->$subsection = 1;
-    }
-
-    return $DB->insert_record('auth_apoa', $newuser);
-
-}
