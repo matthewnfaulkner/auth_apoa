@@ -121,7 +121,7 @@ $string['spinemembershipnumber'] = 'Membership Number to Spine Section, if appli
 $string['membershipnumber'] = 'APOA Membership Number';
 $string['maxspinemembershipnumber'] = 'Current Highest APSS Membership Number';
 $string['maxmembershipnumber'] = 'Current Highest APOA Membership Number';
-$string['useraddedsuccessfully'] = "User successfully added.";
+
 
 $string['footandankle'] = "Foot & Ankle";
 $string['handandupperlimb'] = 'Hand & Upper Limb';
