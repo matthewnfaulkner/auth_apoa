@@ -151,8 +151,10 @@ class auth_plugin_apoa extends auth_plugin_email {
         if($membershipcategory == "Federation Fellow"){
             if($federation = $user->profile_field_federation){
                 $formattedfederation = strtolower(preg_replace('/[^A-Za-z]/', '', $federation));
-                if(!$federationemail = get_config('auth_apoa', 'federationemail'.$formattedfederation)){
-                    throw new \moodle_exception('auth_emailnofederationemail', 'auth_apoa');
+                if($noemailmode === 0){
+                    if(!$federationemail = get_config('auth_apoa', 'federationemail'.$formattedfederation)){
+                        throw new \moodle_exception('auth_emailnofederationemail', 'auth_apoa');
+                    }
                 }
             }
         }
@@ -830,6 +832,10 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
             if($toenrolin){
                 if($membershipcategory != 'Federation Fellow' && $membershipcategory != 'Affiliate Federation Fellow'){
                     $user->profile_field_membership_category_approved = 1;
+                }else{
+                    if (array_key_exists($apoasubscription, $toenrolin)) {
+                        unset($toenrolin[$apoasubscription]);
+                    }
                 }
                 $user->profile_field_hasactivesubscription = 1;
                 profile_save_data($user);
