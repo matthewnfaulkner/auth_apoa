@@ -31,6 +31,7 @@ require_once($CFG->dirroot.'/user/profile/lib.php');
 require_once($CFG->dirroot . '/user/editlib.php');
 require_once($CFG->dirroot.'/login/lib.php');
 require_once($CFG->dirroot.'/login/signup_form.php');
+require_once(__DIR__ . '/lib.php');
 
 use \core_user as core_user;
 
@@ -124,7 +125,9 @@ class signup_form extends \login_signup_form {
             }
 
             profile_signup_fields($mform);
+
             $mform->addHelpButton('profile_field_membership_category', 'membership_category', 'auth_apoa', 'What is this?');
+
             if (signup_captcha_enabled()) {
                 $mform->addElement('recaptcha', 'recaptcha_element', get_string('security_question', 'auth'));
                 $mform->addHelpButton('recaptcha_element', 'recaptcha', 'auth');
@@ -431,7 +434,7 @@ class signup_form extends \login_signup_form {
             }
             $errors += signup_validate_data($data, $files);
             if(empty($errors['email'] && !$data['emailexists'])){
-                    if($user = $this->validate_existing_email($data['email'])){
+                    if($user = validate_existing_email($data['email'])){
                         $data['profile_field_membership_category'] = $user->membership_category;
                         if($user->membership_category == 'Federation Fellow' || $user->membership_category == 'Affiliate Federation Fellow'){
                             $data['profile_field_federation'] = country_to_federation($user->country);
@@ -486,24 +489,6 @@ class signup_form extends \login_signup_form {
         return $context;
     }
 
-    public function validate_existing_email($email){
-        global $DB;
-        if($authrecord =  $DB->get_record('auth_apoa', array('email' => $email))){
-            if($authrecord->membership_category == 'Federation' || $authrecord->membership_category == 'Federation Fellow'){
-                if(country_to_federation($authrecord->country)){
-                    $authrecord->membership_category = 'Federation Fellow';
-                }
-                else{
-                    $authrecord->membership_category = 'Affiliate Federation Fellow';
-                }
-            }
-            if($authrecord->membership_category == 'Paramedical / Affiliate Member'){
-                $authrecord->membership_category = 'Affiliate Member';
-            }
-            return $authrecord;
-        };
-        return false;
-    }
 
     
 }
