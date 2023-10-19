@@ -31,10 +31,12 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 use core_external\external_warnings;
+use tool_pluginskel\local\skel\external_function_file;
 
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir . '/authlib.php');
+require_once($CFG->dirroot . '/auth/apoa/lib.php');
 require_once($CFG->dirroot . '/user/editlib.php');
 require_once($CFG->dirroot . '/user/profile/lib.php');
 
@@ -61,6 +63,45 @@ class auth_apoa_external extends external_api {
         if (empty($CFG->registerauth) or $CFG->registerauth != 'apoa') {
             throw new moodle_exception('registrationdisabled', 'error');
         }
+    }
+
+    public static function check_existing_user_parameters() {
+        return new external_function_parameters(
+            array(
+                'email' => new external_value(core_user::get_property_type('email', 'email')),
+            )
+            );
+    }
+
+    public static function check_existing_user($email) {
+        global $CFG, $PAGE;
+
+        $warnings = array();
+        $params = self::validate_parameters(
+            self::check_existing_user_parameters(),
+            array(
+                'email' => $email,
+            )
+        );
+
+        if($existinguser = validate_existing_email($email)){
+
+        }
+        else{
+            return;
+        }
+
+
+    }
+
+    public static function check_existing_user_returns () {
+        new external_single_structure(
+            array(
+                'exists' => new external_value(PARAM_BOOL, 'Does user exist'),
+                'email' => new external_value(PARAM_EMAIL, 'User email address')
+            )
+            
+        );
     }
 
     /**

@@ -42,5 +42,13 @@ $functions = array(
         'ajax'          => true,
         'loginrequired' => false,
     ),
+    'auth_apoa_check_existing_user' => array(
+        'classname'   => 'auth_apoa_external',
+        'methodname'  => 'check_existing_user',
+        'description' => 'Checks if new user if a existing member',
+        'type'        => 'write',
+        'ajax'          => true,
+        'loginrequired' => false,
+    ),
 );
 

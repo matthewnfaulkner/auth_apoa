@@ -26,8 +26,6 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/authlib.php');
 require_once($CFG->dirroot. '/auth/email/auth.php');
-require_once(__DIR__. '/signup_form.php');
-require_once(__DIR__. '/signupexisting_form.php');
 
 use auth_apoa\signup_form as signup_form;
 use auth_apoa\signupexisting_form as signupexisting_form;
@@ -211,7 +209,7 @@ class auth_plugin_apoa extends auth_plugin_email {
      * Confirm the new user as registered.
      *
      * @param string $username
-     * @param string $confirmsecret
+     * @param string $confirmsecret\A
      */
     function federation_confirm($username, $confirmsecret) {
         global $DB, $SESSION;
@@ -809,6 +807,14 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
         if($authrecord = $DB->get_record('auth_apoa', array('email' => $user->email, 'status' => 1))){
            $lifemember = $authrecord->lifemembership;
            $membershipcategory = $authrecord->membership_category;
+
+           if($user->profile_field_membership_category == null || $user->profile_field_membership_category == 'no membership') {
+                $user->profile_field_membership_category = $membershipcategory;
+                if($membershipcategory != 'Federation Fellow' && $membershipcategory != 'Affiliate Federation Fellow'){
+                    $user->profile_field_federation = $authrecord->country;
+                }
+           }
+
            $subscriptionends = $authrecord->subscriptionends;
            $apoasubscription = get_config('auth_apoa', 'subscriptionapoa');
            if($lifemember){

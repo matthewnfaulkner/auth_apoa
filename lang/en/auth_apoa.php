@@ -106,7 +106,52 @@ If you need help, please contact the site administrator,
 {$a->admin}';
 
 $string['welcomemessage'] = 'Hi {$a->firstname}, welcome to APOA online. I\'m site support if you have any issues feel free to ask them here. Or fill in this <a href="{$a->supportlink}" style="text-decoration: underline;">support form</a>';
-$string['membership_category_help'] = 'The category of your APOA membership. If you are unsure of your membership category or are not a member yet, select "No Membership". This can be updated later.';
+$string['membership_category_help'] =
+   "
+   <b>Honorary Fellow</b>, being a person of distinction approved by
+   the Council in recognition of his
+   <br>
+   <b>Senior Fellow</b>, being a Fellow who has retired from active
+   practice.
+   <br>
+   <b>Life Fellow</b>, being a fully trained orthopaedic surgeon in active
+   practice for at least 5 years and who is a member of the
+   Recognised Organisation of a country, territory or area and
+   who has been nominated by two existing Life fellows and has
+   paid the subscription set by the Executive Committee. Life
+   Fellow will enjoy special recognition and may be granted
+   special privileges set by the Executive Committee.
+   <br>
+   <b>Fellow</b>, being a fully trained orthopaedic surgeon in active
+   practice, who is a member of an organisation recognised by the
+   Council, and who has paid the subscription set by the
+   Executive Committee.
+   <br>
+   <b>Associate Fellow</b>, being a doctor of a medical specialty other
+   than orthopaedics and being a member of an organisation
+   recognised by the Council, and who has paid the subscription
+   set by the Executive Committee.
+   <br>
+   <b>Affiliate Fellow</b>, being a member of a paramedical profession,
+   a scientist, or an organisation recognised by the Council, and
+   who has paid the subscription set by the Executive Committee.
+   <br>
+   <b>Trainee Fellow</b>, being a medical practitioner undergoing
+   structured training in orthopaedic surgery and who has paid the
+   subscription set by the Executive Committee.
+   <br>
+   <b>Federation Member</b> being an organisation or a recognised
+   National Orthopaedic Association of a country, territory, or
+   area, within the Asia Pacific region, admitted by the Council as
+   an Orthopaedic Association.
+   <br>
+   <b>Affiliate Federation Member</b>, being an organisation of a
+   country, territory or area, outside the Asia Pacific region
+   admitted by the Council as an Affiliate National Orthopaedic
+   Association member. Affiliate NOA member has restricted
+   rights as set by the Executive Committee.
+   <br>
+   ";
 $string['noemailmode'] = "No Email Mode";
 $string['noemailmode_desc'] = "Confirmation Emails will no longer be sent but their responses will be simulated. Used for development";
 $string['usernamepolicy'] = "Usernames must be all lowercase with no special characters.";
@@ -115,7 +160,7 @@ $string['usernamepolicy'] = "Usernames must be all lowercase with no special cha
 $string['adduserheader'] = 'User Details';
 $string['adduser'] = 'Add User';
 $string['subscriptionend'] = 'Date of end of subscription';
-$string['subscriptionend_help'] = 'Enter the date when the subscription is due to run out. Leave disbaled if subscription is for lifetime';
+$string['subscriptionend_help'] = 'Enter the date when the subscription is due to run out. Leave disabled if subscription is for lifetime';
 $string['subsections'] = 'Subsection subscriptions';
 $string['spinemembershipnumber'] = 'Membership Number to Spine Section, if applicable';
 $string['membershipnumber'] = 'APOA Membership Number';

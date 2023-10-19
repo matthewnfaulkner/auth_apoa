@@ -130,5 +130,24 @@ function auth_apoa_user_created($event){
     send_welcome_message($user);
 }
 
+function validate_existing_email($email){
+    global $DB;
+    if($authrecord =  $DB->get_record('auth_apoa', array('email' => $email))){
+        if($authrecord->membership_category == 'Federation' || $authrecord->membership_category == 'Federation Fellow'){
+            if(country_to_federation($authrecord->country)){
+                $authrecord->membership_category = 'Federation Fellow';
+            }
+            else{
+                $authrecord->membership_category = 'Affiliate Federation Fellow';
+            }
+        }
+        if($authrecord->membership_category == 'Paramedical / Affiliate Member'){
+            $authrecord->membership_category = 'Affiliate Member';
+        }
+        return $authrecord;
+    };
+    return false;
+}
+
 
 
