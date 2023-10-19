@@ -26,8 +26,6 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/authlib.php');
 require_once($CFG->dirroot. '/auth/email/auth.php');
-require_once(__DIR__. '/signup_form.php');
-require_once(__DIR__. '/signupexisting_form.php');
 
 use auth_apoa\signup_form as signup_form;
 use auth_apoa\signupexisting_form as signupexisting_form;
