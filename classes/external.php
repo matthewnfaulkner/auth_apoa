@@ -76,7 +76,6 @@ class auth_apoa_external extends external_api {
     public static function check_existing_user($email) {
         global $CFG, $PAGE;
 
-        $warnings = array();
         $params = self::validate_parameters(
             self::check_existing_user_parameters(),
             array(
@@ -84,11 +83,17 @@ class auth_apoa_external extends external_api {
             )
         );
 
-        if($existinguser = validate_existing_email($email)){
-
+        if($existinguser = validate_existing_email($params['email'])){
+            return [
+                'exists' => true,
+                'email'  => $existinguser->email,
+            ];
         }
         else{
-            return;
+            return [
+                'exists' => false,
+                'email'  => $existinguser->email,
+            ];
         }
 
 
@@ -98,7 +103,7 @@ class auth_apoa_external extends external_api {
         new external_single_structure(
             array(
                 'exists' => new external_value(PARAM_BOOL, 'Does user exist'),
-                'email' => new external_value(PARAM_EMAIL, 'User email address')
+                'email' => new external_value(PARAM_EMAIL, 'User email address', VALUE_OPTIONAL)
             )
             
         );
