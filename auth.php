@@ -149,9 +149,12 @@ class auth_plugin_apoa extends auth_plugin_email {
         if($membershipcategory == "Federation Fellow"){
             if($federation = $user->profile_field_federation){
                 $formattedfederation = strtolower(preg_replace('/[^A-Za-z]/', '', $federation));
-                if($noemailmode === 0){
+                if($this->noemailmode === 0){
                     if(!$federationemail = get_config('auth_apoa', 'federationemail'.$formattedfederation)){
                         throw new \moodle_exception('auth_emailnofederationemail', 'auth_apoa');
+                    }else {
+                        $categoryclass = membership_category_class($membershipcategory);
+                        $categoryclass->add_approval_request($user);
                     }
                 }
             }
@@ -296,6 +299,7 @@ function send_confirmation_email($user, $confirmationurl = null) {
     return email_to_user($user, $supportuser, $subject, $message, $messagehtml);
 }
 
+
     /**
  * Send email to specified user with confirmation text and activation link.
  *
@@ -337,7 +341,7 @@ function send_federation_confirm_to_user($user) {
     return email_to_user($user, $supportuser, $subject, $message, $messagehtml);
 }
     
-
+    
         /**
      * Send email to specified user with confirmation text and activation link.
      *
@@ -388,6 +392,55 @@ function send_federation_confirm_to_user($user) {
         return $this->email_to_federation($user, $federationemail, $supportuser, $subject, $message, $messagehtml);
     }
 
+        /**
+     * Send email to specified user with confirmation text and activation link.
+     *
+     * @param stdClass $user A {@link $USER} object
+     * @param string $confirmationurl user confirmation URL
+     * @return bool Returns true if mail was sent OK and false if there was an error.
+     */
+    function membership_category_send_confirmation_email_to_federation($user, $federation, $confirmationurl = null, $requestid, $secret) {
+        global $CFG;
+
+        $site = get_site();
+        $supportuser = core_user::get_support_user();
+
+        $data = new stdClass();
+        $data->sitename  = format_string($site->fullname);
+        $data->admin     = generate_email_signoff();
+        $data->fullname  = fullname($user);
+        $subject = get_string('federationemailconfirmationsubject', 'auth_apoa', format_string($site->fullname));
+
+        if(!$federationemail = get_config('auth_apoa', 'federationemail'.$federation)){
+            return;
+        }
+
+        if (empty($confirmationurl)) {
+            $confirmationurl = '/auth/apoa/confirmmembershipcategory.php';
+        }
+
+        $confirmationurl = new moodle_url($confirmationurl);
+        // Remove data parameter just in case it was included in the confirmation so we can add it manually later.
+        $confirmationurl->remove_params('data');
+        $confirmationpath = $confirmationurl->out(false);
+
+        // We need to custom encode the username to include trailing dots in the link.
+        // Because of this custom encoding we can't use moodle_url directly.
+        // Determine if a query string is present in the confirmation url.
+        $hasquerystring = strpos($confirmationpath, '?') !== false;
+        // Perform normal url encoding of the username first.
+        $username = urlencode($user->username);
+        // Prevent problems with trailing dots not being included as part of link in some mail clients.
+        $username = str_replace('.', '%2E', $username);
+
+        $data->link = $confirmationpath . ( $hasquerystring ? '&' : '?') . 'data='. $secret .'/'. $requestid;
+
+        $message     = get_string('federationemailconfirmation', '', $data);
+        $messagehtml = text_to_html(get_string('federationemailconfirmation', 'auth_apoa', $data), false, false, true);
+
+        // Directly email rather than using the messaging system to ensure its not routed to a popup or jabber.
+        return $this->email_to_federation($user, $federationemail, $supportuser, $subject, $message, $messagehtml);
+    }
     /**
  * Send an email to a specified user
  *

@@ -28,6 +28,8 @@ require_once($CFG->dirroot .'/local/subscriptions/lib.php');
 
 if ($ADMIN->fulltree) {
 
+    $ADMIN->add('user', new admin_settingpage('tool_apoausers', get_string('newusers', 'tool_apoausers'), "$CFG->wwwroot/$CFG->admin/tool/apoausers/users.php", 'tool/apoausers:view'));
+
     // Introductory explanation.
     $settings->add(new admin_setting_heading('auth_apoa/pluginname', '',
         new lang_string('auth_apoadescription', 'auth_apoa')));

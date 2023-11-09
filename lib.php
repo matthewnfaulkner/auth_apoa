@@ -25,10 +25,20 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/message/lib.php');
+require_once($CFG->dirroot. '/user/profile/lib.php');
 
+define('MEMBERSHIP_APPROVED', 2);
+define('MEMBERSHIP_DENIED', 0);
+define('MEMBERSHIP_AMENDED', 1);
+
+
+use core\event\notification_sent;
+use core_course\task\content_notification_task;
 use \core_message\api as api;
+use core_message\output\preferences\notification_list;
 use \moodle_url as moodle_url;
 use \core_user as core_user;
+use PHP_CodeSniffer\Reports\Notifysend;
 
 function is_federation_pending(){
     global $USER;
@@ -149,5 +159,135 @@ function validate_existing_email($email){
     return false;
 }
 
+function membership_category_class($membership_category){
 
+    $cleancategory = str_replace(' ', '', strtolower($membership_category));
+
+    $classname = "auth_apoa\\membershipcategory\\$cleancategory";
+
+    if(class_exists($classname)){
+        return new $classname();
+    }else{
+        return new \auth_apoa\membershipcategory\noapprovalrequired($membership_category);
+    }
+
+    return false;
+}
+
+
+/**
+ * Add nodes to myprofile page.
+ *
+ * @param \core_user\output\myprofile\tree $tree Tree object
+ * @param stdClass $user user object
+ * @param bool $iscurrentuser
+ * @param stdClass $course Course object
+ * @return bool
+ */
+function auth_apoa_myprofile_navigation(core_user\output\myprofile\tree $tree, $user, $iscurrentuser, $course) {
+    $params = [
+        'userid' => $user->id
+    ];
+    if ($course) {
+        $params['course'] = $course->id;
+    }
+    $url = new moodle_url('/auth/apoa/updatemembershipcategory.php', $params);
+    $node = new core_user\output\myprofile\node('contact', 'changemembershipcategory',
+        get_string('changemembershipcategory', 'auth_apoa'), null, $url);
+    $tree->add_node($node);
+}
+
+function update_membership_category($formdata){
+    profile_save_data($formdata);
+}
+
+function get_active_approval_requests($userid){
+    global $DB;
+
+    return $DB->get_records('auth_apoa_membershipchanges', array('userid' => $userid, 'approved' => null), 'timecreated DESC', '*');
+}
+
+function get_approval_requests($userid){
+    global $DB;
+
+    return $DB->get_records('auth_apoa_membershipchanges', array('userid' => $userid), 'approved DESC, timecreated DESC', '*');
+}
+
+function approve_membership_category($requestid, $secret){
+    global $DB;
+
+    if($requestrecord = $DB->get_record('auth_apoa_membershipchanges', array('id' => $requestid, 'secret' => $secret, 'approved' => null))){
+        $user = \core_user::get_user($requestrecord->userid);
+        $user->profile_field_membership_category_approved = 1;
+        profile_save_data($user);   
+        $requestrecord->approved = 1;
+        $DB->update_record('auth_apoa_membershipchanges', $requestrecord);
+        auth_apoa_notify_membership_category_approved($user->id);
+        return $user->id;
+    }
+    return 0;
+}
+
+/**
+ * Send a message from one user to another. Will be delivered according to the message recipients messaging preferences
+ *
+ * @param object $userfrom the message sender
+ * @param object $userto the message recipient
+ * @param string $message the message
+ * @param int $format message format such as FORMAT_PLAIN or FORMAT_HTML
+ * @return int|false the ID of the new message or false
+ */
+function auth_apoa_notify_membership_category_processed($userto, $resultdata, $result) {
+    global $PAGE;
+
+    $eventdata = new \core\message\message();
+    $eventdata->courseid         = 1;
+    $eventdata->component        = 'auth_apoa';
+    $eventdata->name             = 'membership_change_notification';
+    $eventdata->userto           = $userto;
+    $eventdata->userfrom         = core_user::get_support_user();
+    $message = '';
+
+    $resulttostring = (object)$resultdata;
+    
+    switch($result){
+        case MEMBERSHIP_DENIED:
+            $eventdata->subject = get_string('membershipcategorydeniedsubject', 'auth_apoa');
+            $message = get_string('membershipcategoryapproved', 'auth_apoa', $resulttostring);
+            break;
+        case MEMBERSHIP_APPROVED:
+            $eventdata->subject = get_string('membershipcategoryapprovedsubject', 'auth_apoa');
+            $message = get_string('membershipcategoryapproved', 'auth_apoa', $resulttostring);
+            break;
+        case MEMBERSHIP_AMENDED:
+            $eventdata->subject = get_string('membershipcategoryamendedsubject', 'auth_apoa');
+            $message = get_string('membershipcategoryamended', 'auth_apoa', $resulttostring);
+            break;
+        default:
+            throw new \moodle_exception('invalidcategoryprocess', 'auth_apoa');
+    }
+
+    $format = FORMAT_HTML;
+    if ($format == FORMAT_HTML) {
+        $eventdata->fullmessagehtml  = $message;
+        //some message processors may revert to sending plain text even if html is supplied
+        //so we keep both plain and html versions if we're intending to send html
+        $eventdata->fullmessage = html_to_text($eventdata->fullmessagehtml);
+    } else {
+        $eventdata->fullmessage      = $message;
+        $eventdata->fullmessagehtml  = '';
+    }
+
+    $eventdata->fullmessageformat = $format;
+    $eventdata->smallmessage     = $message;//store the message unfiltered. Clean up on output.
+    $eventdata->timecreated     = time();
+    $eventdata->notification    = 1;
+    // User image.e.
+    $eventdata->customdata = [
+        'actionbuttons' => [
+            'send' => get_string_manager()->get_string('send', 'message', null, $eventdata->userto->lang),
+        ],
+    ];
+    return message_send($eventdata);
+}
 

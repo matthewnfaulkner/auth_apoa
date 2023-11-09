@@ -314,6 +314,111 @@ function xmldb_auth_apoa_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023062323, 'auth', 'apoa');
     }
 
+    if ($oldversion < 2023062329) {
+
+        // Define table auth_apoa_membershipchanges to be created.
+        $table = new xmldb_table('auth_apoa_membershipchanges');
+
+        // Adding fields to table auth_apoa_membershipchanges.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('newcategory', XMLDB_TYPE_CHAR, '55', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('approved', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('extradata', XMLDB_TYPE_TEXT, null, null, null, null, null);
+
+        // Adding keys to table auth_apoa_membershipchanges.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Conditionally launch create table for auth_apoa_membershipchanges.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Apoa savepoint reached.
+        upgrade_plugin_savepoint(true, 2023062329, 'auth', 'apoa');
+    }
+
+
+    if ($oldversion < 2023062330) {
+
+        // Define field previouscategory to be added to auth_apoa_membershipchanges.
+        $table = new xmldb_table('auth_apoa_membershipchanges');
+        $field = new xmldb_field('previouscategory', XMLDB_TYPE_CHAR, '55', null, XMLDB_NOTNULL, null, '', 'extradata');
+
+        // Conditionally launch add field previouscategory.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('previouslyapproved', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, 0, 'previouscategory');
+
+        // Conditionally launch add field previouslyapproved.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Apoa savepoint reached.
+        upgrade_plugin_savepoint(true, 2023062330, 'auth', 'apoa');
+    }
+
+
+    if ($oldversion < 2023062331) {
+
+        // Define field secret to be added to auth_apoa_membershipchanges.
+        $table = new xmldb_table('auth_apoa_membershipchanges');
+        $field = new xmldb_field('secret', XMLDB_TYPE_CHAR, '15', null, null, null, null, 'previouslyapproved');
+
+        // Conditionally launch add field secret.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Apoa savepoint reached.
+        upgrade_plugin_savepoint(true, 2023062331, 'auth', 'apoa');
+    }
+
+    if ($oldversion < 2023062332) {
+
+        // Changing nullability of field approved on table auth_apoa_membershipchanges to null.
+        $table = new xmldb_table('auth_apoa_membershipchanges');
+        $field = new xmldb_field('approved', XMLDB_TYPE_INTEGER, '4', null, null, null, null, 'timecreated');
+
+        // Launch change of nullability for field approved.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('amendmentneeded', XMLDB_TYPE_INTEGER, '4', null, null, null, '0', 'secret');
+
+        // Conditionally launch add field amendmentneeded.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0, 'amendmentneeded');
+
+        // Conditionally launch add field timemodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('timeapproved', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'timemodified');
+
+        // Conditionally launch add field timeapproved.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('amendmentcomments', XMLDB_TYPE_TEXT, null, null, null, null, null, 'timeapproved');
+
+        // Conditionally launch add field amendmentcomments.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Apoa savepoint reached.
+        upgrade_plugin_savepoint(true, 2023062332, 'auth', 'apoa');
+    }
+
 
     return true;
 }

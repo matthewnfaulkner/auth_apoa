@@ -181,3 +181,61 @@ $string['sports'] = 'Sports Injury';
 $string['trauma'] = 'Trauma';
 $string['waves'] = 'WAVES';
 $string['apoa'] = 'APOA';
+
+
+$string['membershipcategoryapproved'] = 'Your request to change membershipcategory to {$a->category} has been approved';
+$string['membershipcategoryapprovedsubject'] = "Your membership category has been approved";
+
+$string['membershipcategorydenied'] = 'Your request to change membershipcategory to {$a->category} has been denied. 
+Your membership category has been restored to {$a->oldcategory}. 
+The reason your membership category change was denied was: {$a->reason}';
+
+$string['membershipcategorydeniedsubject'] = "Your membership category has been denied";
+
+$string['membershipcategoryamended'] = 'Your request to change membershipcategory to {$a} requires the following amendments:
+{$a->reason}. <a href="/auth/apoa/updatemembershipcategory.php">Click Here</a> to make your amendments.';
+$string['membershipcategoryamendedsubject'] = "Your membership category request requires amendments";
+
+
+$string['changemembershipcategory'] = "Change Membership Category";
+$string['canonlychangeeverymonth'] = 'You can only change your membership category once every 30 days. {$a} days remaining.';
+$string['nomembershipchanges'] = "No Membership Change Requests";
+$string['activemembershipchanges'] = "Membership Change Requests";
+$string['membershipcategory'] = "Membership Category";
+$string['membershipchangeapproved'] = "Status";
+$string['supportingdata'] = "Extra Data";
+$string['options'] = "Options";
+$string['updatemembershipcategory'] = "Change Membership Category";
+$string['categoryextensionheading'] = "Category Specific Fields";
+$string['selectfederation'] = "Select a Federation";
+$string['noapprovalprocessyet'] = "No approval process currently exists for this membership category. Therefore you cannot change to this category.";
+$string['automaticallyapproved'] = "Approval for this membership category is automatic.";
+$string['federationapprovaldescription'] = "Federation members must be a member of a valid national federation. On submission of this
+form the selected federation will be asked to verify your membership to it. If verified your membership category change will be approved.";
+
+$string['messageprovider:membership_approved_notification'] = 'Notification of result of membership change request';
+$string['membershipalreadyapproved'] = 'You have already been approved for this membership category.';
+$string['cancelapprovalrequest'] = 'Cancel Request';
+$string['membershipchangecomments'] = "Comments";
+
+$string['deleteapprovalrequest'] = 'Cancel Membership Change';
+$string['deleteapprovalrequestconfirm'] = 'Cancel';
+$string['amendmentsubmitted'] = 'Amendment Submitted';
+
+$string['changemembershipdescription'] = 'Your membership category enititles you to different benefits 
+but they also have different prerequisites.
+<br>
+<br> . Fellow
+<br> . Associate Fellow
+<br> . Affiliate Fellow
+<br> . Senior Fellow
+<br> . Life Fellow
+<br> . Federation Fellow
+<br> . Affiliate Federation Fellow
+<br> . Trainee Fellow
+<br> . Honorary Fellow
+<br>
+<br>
+As such when seeking approval for your membership category you may need to provide some extra information.
+Selecting a specific category will prompt you to supply the relevant supporting information.
+Sometimes your request might require amendments, you will be notified of this, and can amend your request below.';

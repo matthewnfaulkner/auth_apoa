@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,20 +12,26 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Auth e-mail external API
  *
- * @package     auth_apoa
- * @copyright   2022 Matthew<you@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    auth_apoa
+ * @category   external
+ * @copyright  2016 Juan Leyva <juan@moodle.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @since      Moodle 3.2
  */
 
-defined('MOODLE_INTERNAL') || die();
+ namespace auth_apoa\membershipcategory;
 
-$plugin->component = 'auth_apoa';
-$plugin->release = '0.1.0';
-$plugin->version = 2023062334;
-$plugin->requires = 2021051700;
-$plugin->maturity = MATURITY_ALPHA;
+defined('MOODLE_INTERNAL') || die;
+
+class honoraryfellow extends \auth_apoa\membershipcategory\lifefellow {
+
+    public function __construct(){
+        $this->category = 'Honorary Fellow';
+      }
+
+}

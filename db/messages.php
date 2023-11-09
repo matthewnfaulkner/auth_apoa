@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,20 +12,18 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Defines message providers for uniquecode enrolments.
  *
- * @package     auth_apoa
- * @copyright   2022 Matthew<you@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    enrol_uniquecode
+ * @copyright  2012 Petr Skoda {@link http://skodak.org}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+$messageproviders = array (
 
-$plugin->component = 'auth_apoa';
-$plugin->release = '0.1.0';
-$plugin->version = 2023062334;
-$plugin->requires = 2021051700;
-$plugin->maturity = MATURITY_ALPHA;
+    'membership_change_notification' => array(),
+    
+);
