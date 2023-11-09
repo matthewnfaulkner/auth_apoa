@@ -62,7 +62,7 @@
         $mform->addRule('profile_field_federation', 'Please Select a Country', 'required');
 
         $mform->addElement('static', 'federationapprovaldescription', get_string('federationapprovaldescription', 'auth_apoa'));
-        
+
         $mform->addElement('submit', 'submitbutton', get_string('updatemembershipcategory', 'auth_apoa'));
         $mform->closeHeaderBefore('submitbutton');
 
@@ -78,27 +78,31 @@
         return $errors;
       }
 
-      public function add_approval_request($formdata){
+    public function add_approval_request($formdata, $user = null){
         global $DB, $USER;
 
-          if($DB->get_record('auth_apoa_membershipchanges', array('userid' => $USER->id))){
-              $DB->delete_records('auth_apoa_membershipchanges', array('userid' => $USER->id));
-          }
+        if(empty($user)){
+          $user = $USER;
+        }
 
-          $secret = random_string(15);
-          $newapproval = new \stdClass();
-          $newapproval->userid = $USER->id;
-          $newapproval->newcategory = $this->category;
-          $newapproval->timecreated = time();
-          $newapproval->approved = $this->approve();
-          $newapproval->extradata = $formdata->profile_field_federation;
-          $newapproval->previouscategory = $formdata->previouscategory;
-          $newapproval->previouslyapproved = $formdata->previouslyapproved;
-          $newapproval->secret = $secret;
-          if($inserted = $DB->insert_record('auth_apoa_membershipchanges', $newapproval)){
-              $authplugin = get_auth_plugin('apoa');
-              $formattedfederation = strtolower(preg_replace('/[^A-Za-z]/', '', $formdata->profile_field_federation));
-              $authplugin->membership_category_send_confirmation_email_to_federation($USER, $formattedfederation, null, $inserted, $secret);
-          }
-      }
+        if($DB->get_record('auth_apoa_membershipchanges', array('userid' => $user->id))){
+            $DB->delete_records('auth_apoa_membershipchanges', array('userid' => $user->id));
+        }
+
+        $secret = random_string(15);
+        $newapproval = new \stdClass();
+        $newapproval->userid = $user->id;
+        $newapproval->newcategory = $this->category;
+        $newapproval->timecreated = time();
+        $newapproval->approved = $this->approve();
+        $newapproval->extradata = $formdata->profile_field_federation;
+        $newapproval->previouscategory = $formdata->previouscategory;
+        $newapproval->previouslyapproved = $formdata->previouslyapproved;
+        $newapproval->secret = $secret;
+        if($inserted = $DB->insert_record('auth_apoa_membershipchanges', $newapproval)){
+            $authplugin = get_auth_plugin('apoa');
+            $formattedfederation = strtolower(preg_replace('/[^A-Za-z]/', '', $formdata->profile_field_federation));
+            $authplugin->membership_category_send_confirmation_email_to_federation($user, $formattedfederation, null, $inserted, $secret);
+        }
+    }
   }
