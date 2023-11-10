@@ -152,8 +152,6 @@ class auth_plugin_apoa extends auth_plugin_email {
                 $formattedfederation = strtolower(preg_replace('/[^A-Za-z]/', '', $federation));
                 if($this->noemailmode === 0){
                     if(!$federationemail = get_config('auth_apoa', 'federationemail'.$formattedfederation)){
-                        throw new \moodle_exception('auth_emailnofederationemail', 'auth_apoa');
-                    }else {
                         $categoryclass = membership_category_class($membershipcategory);
                         $categoryclass->add_approval_request($user);
                     }
