@@ -164,12 +164,12 @@ class auth_plugin_apoa extends auth_plugin_email {
                 if($this->noemailmode === 0){
                     if(!$federationemail = get_config('auth_apoa', 'federationemail'.$formattedfederation)){
                         $categoryclass = membership_category_class($membershipcategory);
-                        $categoryclass->add_approval_request($user);
+                        $categoryclass->add_approval_request($user, $user->id);
                     }
                 }
             }
         }
-        
+
         // Save wantsurl against user's profile, so we can return them there upon confirmation.
         if (!empty($SESSION->wantsurl)) {
             if($SESSION->wantsurl == $CFG->wwwroot . '/'){
