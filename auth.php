@@ -145,6 +145,17 @@ class auth_plugin_apoa extends auth_plugin_email {
         if (empty($user->calendartype)) {
             $user->calendartype = $CFG->calendartype;
         }
+        
+
+        $user->profile_field_membership_category_approved = 0;
+        $user->profile_field_hasactivesubscription = 0;
+        $user->id = user_create_user($user, false, false);
+
+        user_add_password_history($user->id, $plainpassword);
+
+        // Save any custom profile field information.
+        profile_save_data($user);
+        
         $federationemail = '';
         $membershipcategory = $user->profile_field_membership_category;
         if($membershipcategory == "Federation Fellow"){
@@ -158,15 +169,6 @@ class auth_plugin_apoa extends auth_plugin_email {
                 }
             }
         }
-
-        $user->profile_field_membership_category_approved = 0;
-        $user->profile_field_hasactivesubscription = 0;
-        $user->id = user_create_user($user, false, false);
-
-        user_add_password_history($user->id, $plainpassword);
-
-        // Save any custom profile field information.
-        profile_save_data($user);
         
         // Save wantsurl against user's profile, so we can return them there upon confirmation.
         if (!empty($SESSION->wantsurl)) {
