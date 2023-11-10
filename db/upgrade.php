@@ -455,6 +455,24 @@ function xmldb_auth_apoa_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023062336, 'auth', 'apoa');
     }
 
+    if ($oldversion < 2023062336) {
+
+        // Changing nullability of field previouscategory on table auth_apoa_membershipchanges to null.
+        $table = new xmldb_table('auth_apoa_membershipchanges');
+        $field = new xmldb_field('previouscategory', XMLDB_TYPE_CHAR, '55', null, XMLDB_NOTNULL, null, 'No Membership', 'extradata');
+
+        // Launch change of nullability for field previouscategory.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('previouslyapproved', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'previouscategory');
+
+        // Launch change of nullability for field previouslyapproved.
+        $dbman->change_field_notnull($table, $field);
+
+        // Apoa savepoint reached.
+        upgrade_plugin_savepoint(true, 2023062336, 'auth', 'apoa');
+    }
+
 
     return true;
 }

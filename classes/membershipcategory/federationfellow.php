@@ -96,8 +96,12 @@
         $newapproval->timecreated = time();
         $newapproval->approved = $this->approve();
         $newapproval->extradata = $formdata->profile_field_federation;
-        $newapproval->previouscategory = $formdata->previouscategory;
-        $newapproval->previouslyapproved = $formdata->previouslyapproved;
+        if(isset($formdata->previouscategory)){
+          $newapproval->previouscategory = $formdata->previouscategory;
+        }
+        if(isset($formdata->previouslyapproved)){
+          $newapproval->previouslyapproved = $formdata->previouslyapproved;
+        } 
         $newapproval->secret = $secret;
         if($inserted = $DB->insert_record('auth_apoa_membershipchanges', $newapproval)){
             $authplugin = get_auth_plugin('apoa');

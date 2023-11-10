@@ -66,8 +66,12 @@ abstract class membership_category {
         $newapproval->timemodified = $newapproval->timecreated;
         $newapproval->approved = $this->approve();
         $newapproval->extradata = $formdata->extradata;
-        $newapproval->previouscategory = $formdata->previouscategory ? $formdata->previouscategory : 'No Membership';
+        if(isset($formdata->previouscategory)){
+            $newapproval->previouscategory = $formdata->previouscategory;
+          }
+        if(isset($formdata->previouslyapproved)){
         $newapproval->previouslyapproved = $formdata->previouslyapproved;
+        } 
 
         $DB->insert_record('auth_apoa_membershipchanges', $newapproval);
 
