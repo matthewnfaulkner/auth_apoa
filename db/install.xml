@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="auth/apoa/db" VERSION="20231110" COMMENT="XMLDB file for Moodle auth/apoa"
+<XMLDB PATH="auth/apoa/db" VERSION="20240104" COMMENT="XMLDB file for Moodle auth/apoa"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -37,6 +37,7 @@
         <FIELD NAME="phone" TYPE="char" LENGTH="45" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="fax" TYPE="char" LENGTH="45" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="institution" TYPE="char" LENGTH="256" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="spinesubscriptionends" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

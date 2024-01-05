@@ -455,6 +455,21 @@ function xmldb_auth_apoa_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023062336, 'auth', 'apoa');
     }
 
+    if ($oldversion < 2023062337) {
+
+        // Define field spinesubscriptionends to be added to auth_apoa.
+        $table = new xmldb_table('auth_apoa');
+        $field = new xmldb_field('spinesubscriptionends', XMLDB_TYPE_INTEGER, '10', null, null, null, '0', 'institution');
+
+        // Conditionally launch add field spinesubscriptionends.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Apoa savepoint reached.
+        upgrade_plugin_savepoint(true, 2023062337, 'auth', 'apoa');
+    }
+
 
     return true;
 }

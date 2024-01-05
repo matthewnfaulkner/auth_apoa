@@ -239,3 +239,4 @@ but they also have different prerequisites.
 As such when seeking approval for your membership category you may need to provide some extra information.
 Selecting a specific category will prompt you to supply the relevant supporting information.
 Sometimes your request might require amendments, you will be notified of this, and can amend your request below.';
+$string['declineinvite'] = 'We are sorry to hear that you have declined your invite to join APOA online. Your account has been flagged for deletion.';
