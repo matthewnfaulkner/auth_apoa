@@ -240,7 +240,7 @@ As such when seeking approval for your membership category you may need to provi
 Selecting a specific category will prompt you to supply the relevant supporting information.
 Sometimes your request might require amendments, you will be notified of this, and can amend your request below.';
 $string['declineinvite'] = 'We are sorry to hear that you have declined your invite to join APOA online. Your account has been flagged for deletion.';
-$string['inviteaccepted'] = "Thank you for accepting your invitation to the upcoming 2024 APOA Congress";
+$string['inviteaccepted'] = "Thank you for accepting your invitation to the upcoming 2024 APOA Congress.";
 $string['invitedeclined'] = "We are sorry to hear you won't be joining us at the upcoming 2024 APOA Congress. We look forward to our next meeting. Thank you.";
 $string['inviteacceptedspecial'] = "Thank you for accepting your invitation to the upcoming 2024 APOA Congress. 
 As an esteemed guest you will receive complimentary registration and accomodation. To allow us to arrange this, you will receive an email
