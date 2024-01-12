@@ -245,3 +245,6 @@ $string['invitedeclined'] = "We are sorry to hear you won't be joining us at the
 $string['inviteacceptedspecial'] = "Thank you for accepting your invitation to the upcoming 2024 APOA Congress. 
 As an esteemed guest you will receive complimentary registration and accomodation. To allow us to arrange this, you will receive an email
 with instructions on how to provide the details we require.";
+$string['inviteacceptedspecialnoaccom'] = "Thank you for accepting your invitation to the upcoming 2024 APOA Congress. 
+As an esteemed guest you will receive complimentary registration. To allow us to arrange this, you will receive an email
+with instructions on how to provide the details we require.";

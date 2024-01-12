@@ -43,6 +43,9 @@ switch ($which) {
     case "inviteacceptedspecial":
         echo "<p>".get_string("inviteacceptedspecial",'auth_apoa')."</p>\n";
         break;
+    case "inviteacceptedspecialnoaccom":
+        echo "<p>".get_string("inviteacceptedspecialnoaccom",'auth_apoa')."</p>\n";
+        break;
 }
 
 echo $OUTPUT->box_end();
