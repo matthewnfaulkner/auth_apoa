@@ -29,11 +29,27 @@
  require_once($CFG->libdir . '/authlib.php');
 
 
+$which = optional_param('reason', "websitedecline", PARAM_TEXT);
+
 $PAGE->set_url('/auth/apoa/invitedeclined.php');
 $PAGE->set_context(context_system::instance());
 
 echo $OUTPUT->header();
 echo $OUTPUT->box_start('generalbox centerpara boxwidthnormal boxaligncenter text-primary');
-echo "<p>".get_string("declineinvite",'auth_apoa')."</p>\n";
+switch ($which) {
+    case "websitedecline":
+        echo "<p>".get_string("declineinvite",'auth_apoa')."</p>\n";
+        break;
+    case "inviteaccepted":
+        echo "<p>".get_string("inviteaccepted",'auth_apoa')."</p>\n";
+        break;
+    case "invitedeclined":
+        echo "<p>".get_string("invitedeclined",'auth_apoa')."</p>\n";
+        break;
+    case "inviteacceptedspecial":
+        echo "<p>".get_string("inviteacceptedspecial",'auth_apoa')."</p>\n";
+        break;
+}
+
 echo $OUTPUT->box_end();
 echo $OUTPUT->footer();
