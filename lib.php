@@ -323,7 +323,7 @@ function send_accept_trigger(){
         return;
     }
 
-    $apiUrl = 'https://script.google.com/macros/s/AKfycbwz8T5MT3dS21foTOeOcPsJhwkhkoiriy3h3o94m3gvqwOWe0_M7oASIK8R4JIQWi9ldQ/exec?token=AKfycbwjvoPMS7phLJxkqWs5E7IWIMa71nL3Mv1g3F7tb_v58SqPRsJLxVVWdtt8yfpXAz0UZw&method=' . $method;
+    $apiUrl = 'https://script.google.com/macros/s/AKfycbwC_N2685Gq3tSAczXNfl-CavOajaLiDZPHJmaj9dMAVVZemlNY44KbejSP6ybZZsVUGw/exec?token=AKfycbwjvoPMS7phLJxkqWs5E7IWIMa71nL3Mv1g3F7tb_v58SqPRsJLxVVWdtt8yfpXAz0UZw&method=' . $method;
 
     $token = "AKfycbwjvoPMS7phLJxkqWs5E7IWIMa71nL3Mv1g3F7tb_v58SqPRsJLxVVWdtt8yfpXAz0UZw";    
 
