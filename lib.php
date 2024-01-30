@@ -304,17 +304,14 @@ function send_accept_trigger(){
     $category = optional_param('category', '', PARAM_ALPHA);
     $fromsender = optional_param('fromsender', TRUE, PARAM_BOOL);
 
-    if($method === ''){
-        $method = $category;
-    }
 
-    if(!$email || !$method) {
+    if(!$email || !$category) {
         return;
     }
 
     $accpetedevent =  auth_apoa\event\auth_apoa_invite_accepted::create(array(
         'context' => \context_system::instance(),
-        'other' => array('email' => $email, 'method' => $method, 'fromsender' => $fromsender)
+        'other' => array('email' => $email, 'category' => $category, 'fromsender' => $fromsender)
     ));
 
     $accpetedevent->trigger();
