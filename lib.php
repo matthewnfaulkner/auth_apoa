@@ -300,7 +300,7 @@ function send_accept_trigger(){
 
     global $CFG;
     $email = optional_param('email', '', PARAM_EMAIL);
-    $method = optional_param('method', '', PARAM_ALPHA);
+    $method = optional_param('method', 'decline', PARAM_ALPHA);
     $category = optional_param('category', '', PARAM_ALPHA);
     $fromsender = optional_param('fromsender', TRUE, PARAM_BOOL);
 
@@ -308,13 +308,15 @@ function send_accept_trigger(){
     if(!$email || !$category) {
         return;
     }
+    
+    if($method == "accept"){
+        $accpetedevent =  auth_apoa\event\auth_apoa_invite_accepted::create(array(
+            'context' => \context_system::instance(),
+            'other' => array('email' => $email, 'category' => $category, 'fromsender' => $fromsender)
+        ));
 
-    $accpetedevent =  auth_apoa\event\auth_apoa_invite_accepted::create(array(
-        'context' => \context_system::instance(),
-        'other' => array('email' => $email, 'category' => $category, 'fromsender' => $fromsender)
-    ));
-
-    $accpetedevent->trigger();
+        $accpetedevent->trigger();
+    }
 
     if($fromsender){
         return;

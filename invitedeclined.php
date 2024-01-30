@@ -35,6 +35,8 @@ $PAGE->set_url('/auth/apoa/invitedeclined.php');
 $PAGE->set_context(context_system::instance());
 
 echo $OUTPUT->header();
+
+
 echo $OUTPUT->box_start('generalbox centerpara boxwidthnormal boxaligncenter text-primary');
 switch ($which) {
     case "websitedecline":
@@ -42,6 +44,7 @@ switch ($which) {
         break;
     case "invitedeclined":
         echo "<p>".get_string("invitedeclined",'auth_apoa')."</p>\n";
+        send_accept_trigger();
         break;
 }
 
