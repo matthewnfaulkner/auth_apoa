@@ -301,14 +301,14 @@ function send_accept_trigger(){
     global $CFG;
     $email = optional_param('email', '', PARAM_EMAIL);
     $method = optional_param('method', 'decline', PARAM_ALPHA);
-    $category = optional_param('category', '', PARAM_ALPHA);
+    $category = optional_param('category', 'all', PARAM_ALPHA);
     $fromsender = optional_param('fromsender', TRUE, PARAM_BOOL);
 
 
-    if(!$email || !$category) {
+    if(!$email) {
         return;
     }
-    
+
     if($method == "accept"){
         $accpetedevent =  auth_apoa\event\auth_apoa_invite_accepted::create(array(
             'context' => \context_system::instance(),
