@@ -291,3 +291,69 @@ function auth_apoa_notify_membership_category_processed($userto, $resultdata, $r
     return message_send($eventdata);
 }
 
+
+
+
+
+function send_accept_trigger(){
+
+
+    global $CFG;
+    $email = optional_param('email', '', PARAM_EMAIL);
+    $method = optional_param('method', '', PARAM_ALPHA);
+    $category = optional_param('category', '', PARAM_ALPHA);
+    $fromsender = optional_param('fromsender', TRUE, PARAM_BOOL);
+
+    if($method === ''){
+        $method = $category;
+    }
+
+    if(!$email || !$method) {
+        return;
+    }
+
+    $accpetedevent =  auth_apoa\event\auth_apoa_invite_accepted::create(array(
+        'context' => \context_system::instance(),
+        'other' => array('email' => $email, 'method' => $method, 'fromsender' => $fromsender)
+    ));
+
+    $accpetedevent->trigger();
+
+    if($fromsender){
+        return;
+    }
+
+    $apiUrl = 'https://script.google.com/macros/s/AKfycbwz8T5MT3dS21foTOeOcPsJhwkhkoiriy3h3o94m3gvqwOWe0_M7oASIK8R4JIQWi9ldQ/exec?token=AKfycbwjvoPMS7phLJxkqWs5E7IWIMa71nL3Mv1g3F7tb_v58SqPRsJLxVVWdtt8yfpXAz0UZw&method=' . $method;
+
+    $token = "AKfycbwjvoPMS7phLJxkqWs5E7IWIMa71nL3Mv1g3F7tb_v58SqPRsJLxVVWdtt8yfpXAz0UZw";    
+
+    $data = array('method' => $method, 'email' => $email, 'token' => $token);
+
+    $json = json_encode($data);
+
+    $apiHeaders = [
+        'Accept: application/json',
+    ];
+
+        $options = [
+            'http' => [
+                'header' => implode("\r\n", $apiHeaders),
+                'method' => 'POST',
+                'content' => $json
+            ],
+        ];
+
+        $context = stream_context_create($options);
+
+        $response = file_get_contents($apiUrl, false, $context);
+
+        if ($response === false) {
+            // Handle error, e.g., connection error or invalid response
+            return false;
+        } else {
+            // Process the API response
+            $response = json_decode($response, true);
+            return $response['data'];
+        }
+    
+}

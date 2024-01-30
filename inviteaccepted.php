@@ -35,6 +35,9 @@ $PAGE->set_url('/auth/apoa/invitedeclined.php');
 $PAGE->set_context(context_system::instance());
 
 echo $OUTPUT->header();
+
+send_accept_trigger();
+
 echo $OUTPUT->box_start('generalbox centerpara boxwidthnormal boxaligncenter text-primary');
 switch ($which) {
     case "inviteaccepted":
