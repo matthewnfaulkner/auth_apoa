@@ -470,6 +470,21 @@ function xmldb_auth_apoa_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023062337, 'auth', 'apoa');
     }
 
+    if ($oldversion < 2023062338) {
+
+        // Define field oncology to be added to auth_apoa.
+        $table = new xmldb_table('auth_apoa');
+        $field = new xmldb_field('oncology', XMLDB_TYPE_INTEGER, '4', null, null, null, '0', 'spinesubscriptionends');
+
+        // Conditionally launch add field oncology.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Apoa savepoint reached.
+        upgrade_plugin_savepoint(true, 2023062338, 'auth', 'apoa');
+    }
+
 
     return true;
 }

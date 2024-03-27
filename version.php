@@ -26,6 +26,6 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'auth_apoa';
 $plugin->release = '0.1.0';
-$plugin->version = 2023062337;
+$plugin->version = 2023062338;
 $plugin->requires = 2021051700;
 $plugin->maturity = MATURITY_ALPHA;
