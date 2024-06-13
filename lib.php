@@ -185,6 +185,11 @@ function membership_category_class($membership_category){
  * @return bool
  */
 function auth_apoa_myprofile_navigation(core_user\output\myprofile\tree $tree, $user, $iscurrentuser, $course) {
+    global $USER;
+
+    if($USER->id != $user->id){
+        return;
+    }
     $params = [
         'userid' => $user->id
     ];
