@@ -36,11 +36,13 @@ abstract class membership_category {
 
     protected string $category;
 
-    public function __construct($category){
+    public function __construct(){
         $this->name = strtolower(str_replace(' ', '', $this->category));
     }
 
-    abstract public function approve();
+    public function approve(){
+        return get_config('auth_apoa', 'membershipcategoryapproval' . $this->name);
+    }
 
     abstract public function extend_update_form(\MoodleQuickForm $mform, $insertbefore);
 
@@ -73,7 +75,9 @@ abstract class membership_category {
         $newapproval->previouslyapproved = $formdata->previouslyapproved;
         } 
 
-        $DB->insert_record('auth_apoa_membershipchanges', $newapproval);
+        return $DB->insert_record('auth_apoa_membershipchanges', $newapproval);
+
+        
 
     }
 

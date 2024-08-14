@@ -126,16 +126,18 @@ if($formdata = $mform->get_data()){
         if($categoryclass = membership_category_class($formdata->profile_field_membership_category)){
             $formdata->previouscategory = $profilefields->membership_category;
             $formdata->previouslyapproved = $profilefields->membership_category_approved;
-            $categoryclass->add_approval_request($formdata);
             $formdata->profile_field_membership_category_approved = (int)$categoryclass->approve();
+            $categoryclass->add_approval_request($formdata);
+            
             profile_save_data($formdata);
+            \core\event\user_updated::create_from_userid($user->id)->trigger();
         }
     }
 }
 
 echo $OUTPUT->heading(get_string('changemembershipcategory', 'auth_apoa'));
 
-echo html_writer::tag('p', format_text(get_string('changemembershipdescription', 'auth_apoa'), true, array('filter' => true)));
+echo html_writer::tag('p', format_text(get_string('changemembershipdescription', 'auth_apoa'), FORMAT_HTML, array('filter' => true, 'context' => $context)));
 
 $requests = get_approval_requests($USER->id);
 
@@ -160,11 +162,13 @@ $daysremaining = 0;
 if($requests){
     $mostrecentrequest = reset($requests);
 
-    $monthhaspassed = time() - $mostrecentrequest->timecreated > 2592000000;
+    $timebetweenchanges = get_config('auth_apoa', 'membershipcategoryrefresh') * 1000;
 
-    if(!$monthhaspassed){
+    $timehaspassed = time() - $mostrecentrequest->timecreated > $timebetweenchanges;
+
+    if(!$timehaspassed){
         $unapproved = true;
-        $daysremaining =  floor(($mostrecentrequest->timecreated + 2592000000 - time()) / 86400000);
+        $daysremaining =  floor(($mostrecentrequest->timecreated + $timebetweenchanges - time()) / 86400000);
     }
 
     foreach($requests as $request){
@@ -213,7 +217,10 @@ if($requests){
 if(!$unapproved || is_siteadmin()){
     echo $mform->display();
 }else{
-    echo $OUTPUT->notification(get_string('canonlychangeeverymonth', 'auth_apoa', $daysremaining), 'error');
+    echo $OUTPUT->notification(get_string('canonlychangeeverymonth', 
+        'auth_apoa', 
+        array('timebetweenchanges' => floor($timebetweenchanges/86400000), 'daysremaining' => $daysremaining)), 
+        'error');
 }
 
 if (!empty($table)) {

@@ -33,6 +33,7 @@ class noapprovalrequired extends \auth_apoa\membershipcategory\membership_catego
     
     public function __construct($category){
         $this->category = $category;
+        parent::__construct($this->category);
       }
 
     public function approve(){

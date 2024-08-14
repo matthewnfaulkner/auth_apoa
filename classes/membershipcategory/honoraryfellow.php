@@ -32,6 +32,7 @@ class honoraryfellow extends \auth_apoa\membershipcategory\lifefellow {
 
     public function __construct(){
         $this->category = 'Honorary Fellow';
+        parent::__construct($this->category);
       }
 
 }

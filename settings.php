@@ -39,17 +39,15 @@ if ($ADMIN->fulltree) {
         new lang_string('yes'),
     );
 
-    $settings->add(new admin_setting_configselect('auth_apoa/recaptcha',
-        new lang_string('auth_apoarecaptcha_key', 'auth_apoa'),
-        new lang_string('auth_apoarecaptcha', 'auth_apoa'), 0, $options));
-
     $settings->add(new admin_setting_configcheckbox('auth_apoa/noemailmode', new lang_string('noemailmode', 'auth_apoa'),
         new lang_string('noemailmode_desc', 'auth_apoa'), 0));
+
+    $settings->add(new admin_setting_configduration('auth_apoa/membershipcategoryrefresh', new lang_string('membershipcategoryrefresh', 'auth_apoa'),
+        new lang_string('membershipcategoryrefresh_desc', 'auth_apoa'), 0));
 
     $authplugin = get_auth_plugin('apoa');
     display_auth_lock_options($settings, $authplugin->authtype, $authplugin->userfields,
             get_string('auth_fieldlocks_help', 'auth'), false, false);
-
 
     $settings->add(new admin_setting_heading('auth_apoa/subscriptionmapping',  new lang_string('subscriptionmapping', 'auth_apoa'),
             new lang_string('subscriptionmapping_desc', 'auth_apoa')));
@@ -77,13 +75,23 @@ if ($ADMIN->fulltree) {
         $formattedsetting = strtolower(preg_replace('/[^A-Za-z]/', '', $federation));
         $settings->add(new admin_setting_configtext('auth_apoa/federationemail' . $formattedsetting,
             $federation,
-            new lang_string('auth_apoafederationemail', 'auth_apoa'),
+            '',
             '',
             PARAM_EMAIL));
     }
 
-    
+    $settings->add(new admin_setting_heading('auth_apoa/membershipcategoryapprovals',  new lang_string('membershipcategoryapprovalsheader', 'auth_apoa'),
+        new lang_string('membershipcategoryapprovals', 'auth_apoa')));
     
 
+    $membershipcategoryfield = $DB->get_record('user_info_field', array('shortname' => 'membership_category'));
+    $membershipcategories = explode("\n", $membershipcategoryfield->param1);
 
+    foreach($membershipcategories as $category){
+        $formattedsetting = strtolower(preg_replace('/[^A-Za-z]/', '', $category));
+        $settings->add(new admin_setting_configcheckbox('auth_apoa/membershipcategoryapproval' . $formattedsetting,
+            $category,
+            '',
+            1));
+    }
 }

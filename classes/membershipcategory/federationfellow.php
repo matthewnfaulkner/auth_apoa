@@ -35,11 +35,9 @@
 
     public function __construct(){
       $this->category = 'Federation Fellow';
+      parent::__construct($this->category);
     }
 
-      public function approve(){
-          return null;
-      }
 
       public function extend_update_form(\MoodleQuickForm $mform, $insertbefore)
       {
@@ -104,9 +102,14 @@
         } 
         $newapproval->secret = $secret;
         if($inserted = $DB->insert_record('auth_apoa_membershipchanges', $newapproval)){
-            $authplugin = get_auth_plugin('apoa');
-            $formattedfederation = strtolower(preg_replace('/[^A-Za-z]/', '', $formdata->profile_field_federation));
-            $authplugin->membership_category_send_confirmation_email_to_federation($user, $formattedfederation, null, $inserted, $secret);
+            if(!$this->approve()){
+              $authplugin = get_auth_plugin('apoa');
+              $formattedfederation = strtolower(preg_replace('/[^A-Za-z]/', '', $formdata->profile_field_federation));
+              $authplugin->membership_category_send_confirmation_email_to_federation($user, $formattedfederation, null, $inserted, $secret);
+              return $formattedfederation;
+            }
         }
+        
+        return false;
     }
   }

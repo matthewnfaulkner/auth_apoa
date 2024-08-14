@@ -198,7 +198,7 @@ $string['membershipcategoryamendedsubject'] = "Your membership category request 
 
 
 $string['changemembershipcategory'] = "Change Membership Category";
-$string['canonlychangeeverymonth'] = 'You can only change your membership category once every 30 days. {$a} days remaining.';
+$string['canonlychangeeverymonth'] = 'You can only change your membership category once every {$a->timebetweenchanges} days. {$a->daysremaining} days remaining.';
 $string['nomembershipchanges'] = "No Membership Change Requests";
 $string['activemembershipchanges'] = "Membership Change Requests";
 $string['membershipcategory'] = "Membership Category";
@@ -248,3 +248,9 @@ with instructions on how to provide the details we require.";
 $string['inviteacceptedspecialnoaccom'] = "Thank you for accepting your invitation to the upcoming 2024 APOA Congress. 
 As an esteemed guest you will receive complimentary registration. To allow us to arrange this, you will receive an email
 with instructions on how to provide the details we require.";
+$string['membershipcategoryrefresh'] = "Time between membership changes";
+$string['membershipcategoryrefresh_desc'] = "Minimum time users must wait between successful membership category change requests.";
+$string['membershipcategoryapprovalsheader'] = "Approval required for membership category";
+$string['membershipcategoryapprovals'] = "Choose whether each memebrship category doesn't require approval. Checking the box means that the chosen membership category DOES NOT require additional approval.";
+$string['auth_apoarecaptcha_key'] = "Recaptcha enabled";
+$string['auth_apoarecaptcha_key_desc'] = "Choose whter";

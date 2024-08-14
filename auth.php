@@ -145,9 +145,16 @@ class auth_plugin_apoa extends auth_plugin_email {
         if (empty($user->calendartype)) {
             $user->calendartype = $CFG->calendartype;
         }
-        
+        $membershipcategory = $user->profile_field_membership_category;
 
-        $user->profile_field_membership_category_approved = 0;
+        $categoryclass = membership_category_class($membershipcategory);
+        if(!$categoryclass->approve()){
+            $approvalneeded = $categoryclass->add_approval_request(new stdClass(), $user);
+            $user->profile_field_membership_category_approved = 0;
+        }else{
+            $user->profile_field_membership_category_approved = 1;
+        }
+
         $user->profile_field_hasactivesubscription = 0;
         $user->id = user_create_user($user, false, false);
 
@@ -156,19 +163,8 @@ class auth_plugin_apoa extends auth_plugin_email {
         // Save any custom profile field information.
         profile_save_data($user);
         
-        $federationemail = '';
-        $membershipcategory = $user->profile_field_membership_category;
-        if($membershipcategory == "Federation Fellow"){
-            if($federation = $user->profile_field_federation){
-                $formattedfederation = strtolower(preg_replace('/[^A-Za-z]/', '', $federation));
-                if($this->noemailmode === 0){
-                    if(!$federationemail = get_config('auth_apoa', 'federationemail'.$formattedfederation)){
-                        $categoryclass = membership_category_class($membershipcategory);
-                        $categoryclass->add_approval_request(new stdClass(), $user);
-                    }
-                }
-            }
-        }
+        
+
 
         // Save wantsurl against user's profile, so we can return them there upon confirmation.
         if (!empty($SESSION->wantsurl)) {
@@ -181,7 +177,7 @@ class auth_plugin_apoa extends auth_plugin_email {
         // Trigger event.
         \core\event\user_created::create_from_userid($user->id)->trigger();
 
-        if($federationemail){
+        if($approvalneeded){
             $confirmationurl = new moodle_url('/auth/apoa/user_confirm.php', array('data' => "$user->secret/$user->username", 'federation' => $formattedfederation));
 
         }

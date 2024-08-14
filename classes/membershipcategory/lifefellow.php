@@ -36,10 +36,6 @@ class lifefellow extends \auth_apoa\membershipcategory\membership_category {
         parent::__construct($this->category);
       }
 
-    public function approve(){
-        return null;
-    }
-
     public function approval_hook(){
     return;
     }
