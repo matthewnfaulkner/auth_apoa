@@ -163,7 +163,8 @@ class auth_plugin_apoa extends auth_plugin_email {
         // Save any custom profile field information.
         profile_save_data($user);
         
-        
+        $manager = new \core_privacy\local\sitepolicy\manager();
+        $manager->accept();
 
 
         // Save wantsurl against user's profile, so we can return them there upon confirmation.
