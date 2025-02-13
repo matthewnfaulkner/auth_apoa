@@ -361,3 +361,15 @@ function send_accept_trigger(){
         }
     
 }
+
+function process_subscriptions_form($formdata) {
+
+    global $USER;
+
+    foreach($formdata as $key => $value) {
+        if(is_numeric($key) && $value){
+            local_subscriptions_add_subscription_to_cart($value, $USER->id);
+        }
+        
+    }
+}
