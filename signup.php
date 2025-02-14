@@ -47,8 +47,8 @@ if (empty($SESSION->wantsurl)) {
     }
 }
 
-if (isloggedin() and !isguestuser()) {
-    // Prevent signing up when already logged in.
+if (isloggedin() and !isguestuser() and !is_siteadmin()) {
+    // Prevent signing up when already logged in allow admin to edit blocks.
     echo $OUTPUT->header();
     echo $OUTPUT->box_start();
     $logout = new single_button(new moodle_url('/login/logout.php',
@@ -94,8 +94,8 @@ if ($mform_signup->is_cancelled()) {
 }
 
 
-$newaccount = get_string('standard');
-$login      = get_string('login');
+$newaccount = get_string('signup');
+$login      = get_string('signup');
 
 $PAGE->navbar->add($login);
 $PAGE->navbar->add($newaccount);
@@ -106,7 +106,13 @@ $PAGE->set_heading($SITE->fullname);
 
 echo $OUTPUT->header();
 
-echo $OUTPUT->box_start('general');
+$blockshtml = $OUTPUT->blocks('content');
+
+echo  $OUTPUT->addblockbutton();
+
+echo $OUTPUT->custom_block_region('content');
+
+echo $OUTPUT->box_start('general col-12 col-lg-8 col-xl-6 m-auto');
 if ($mform_signup instanceof renderable) {
     // Try and use the renderer from the auth plugin if it exists.
     try {

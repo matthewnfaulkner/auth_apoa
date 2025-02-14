@@ -26,22 +26,33 @@
 require('../../config.php');
 require('signup_subscriptions_form.php');
 
-$iid = optional_param('iid', '', PARAM_INT);
+$skip = optional_param('skip', '', PARAM_INT);
 
 require_login(null, false);
 
-if (empty($iid)) {
+if (empty($skip)) {
     $mform1 = new signup_subscriptions_form1();
 
     if ($formdata = $mform1->get_data()) {
         process_subscriptions_form($formdata);
 
     } else {
+
+        $choosemaintitle = get_string('choosemaintitle', 'auth_apoa');
+        $choosemaindescription = get_string('choosemaintitle_desc', 'auth_apoa');
+
+        $PAGE->set_title($choosemaintitle);
+
+        $PAGE->set_heading($SITE->fullname);
+
         echo $OUTPUT->header();
 
-        echo $OUTPUT->heading_with_help(get_string('uploadusers', 'tool_uploaduser'), 'uploadusers', 'tool_uploaduser');
+        echo $OUTPUT->heading($choosemaintitle, 2, 'text-primary');
+
+        echo $OUTPUT->paragraph($choosemaindescription, 'text-primary');
 
         $mform1->display();
+
         echo $OUTPUT->footer();
         die;
     }
@@ -63,10 +74,17 @@ if ($formdata = $mform2->is_cancelled()) {
 }
 
 // Print the header.
+
+$choosesectionstitle = get_string('choosesectionstitle', 'auth_apoa');
+$choosesectionsdescription = get_string('choosesectionstitle_desc', 'auth_apoa');
+
+$PAGE->set_title($choosesectionstitle);
+$PAGE->set_heading($SITE->fullname);
+
 echo $OUTPUT->header();
 
-echo $OUTPUT->heading(get_string('uploaduserspreview', 'tool_uploaduser'));
-
+echo $OUTPUT->heading($choosesectionstitle, 2, 'text-primary');
+echo $OUTPUT->paragraph($choosesectionsdescription, 'text-primary');
 
 $mform2->display();
 

@@ -44,6 +44,7 @@ class signup_subscriptions_form1 extends \moodleform {
     function definition() {
         $mform = $this->_form;
 
+
         $mainsubscriptionid = local_subscriptions_get_main_subscription();
         $enrolmentoptions = enrol_get_instances($mainsubscriptionid, true);
 
@@ -52,7 +53,7 @@ class signup_subscriptions_form1 extends \moodleform {
             $plugin = enrol_get_plugin($option->enrol);
 
             if($plugin->show_enrolme_link($option)) {
-                $radioarray[] = $mform->createElement('radio', $mainsubscriptionid, '', format_text($option->name), $option->id);
+                $radioarray[] = $mform->createElement('radio', $mainsubscriptionid, '', get_string('subscriptionoptionlabel', 'auth_apoa', $option), $option->id);
             }
             
         }
@@ -83,15 +84,22 @@ class signup_subscriptions_form2 extends \moodleform {
                 unset($subscriptions[$mainsubscriptionid]);
             }
             foreach($subscriptions as $subscription) {
+
+                $mform->addElement('header', 'header_' . $subscription->id, $subscription->fullname);
+                $mform->setExpanded('header_' . $subscription->id);
+
+                $mform->addElement('static', 'desc_' . $subscription->id, format_text($subscription->summary, $subscription->summaryformat));
+                $mform->setExpanded('header_' . $subscription->id);
+
                 $enrolmentoptions = enrol_get_instances($subscription->id, true);
                 $radioarray=array();
-                $radioarray[] = $mform->createElement('radio', $subscription->id, '', get_string('none'), 0);
+                $radioarray[] = $mform->createElement('radio', $subscription->id, '', get_string('dontjoinsection', 'auth_apoa'), 0);
                 foreach($enrolmentoptions as $option) {
                     
                     $plugin = enrol_get_plugin($option->enrol);
 
                     if($plugin->show_enrolme_link($option)) {
-                        $radioarray[] = $mform->createElement('radio', $subscription->id, '', format_text($option->name), $option->id);
+                        $radioarray[] = $mform->createElement('radio', $subscription->id, '', get_string('subscriptionoptionlabel', 'auth_apoa', $option), $option->id);
                     }
                 }
                 $mform->addGroup($radioarray, 'radioarray_' . $subscription->id , '', array(' '), false);
@@ -99,9 +107,9 @@ class signup_subscriptions_form2 extends \moodleform {
             }
         };
 
-        $mform->addElement('hidden', 'iid');
-        $mform->setType('iid', PARAM_INT);
-        $mform->setDefault('iid', 1);
+        $mform->addElement('hidden', 'skip');
+        $mform->setType('skip', PARAM_INT);
+        $mform->setDefault('skip', 1);
 
         $this->set_display_vertical();
         $this->add_action_buttons(true, get_string('continue'));

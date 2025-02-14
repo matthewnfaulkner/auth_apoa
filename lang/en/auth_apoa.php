@@ -254,3 +254,13 @@ $string['membershipcategoryapprovalsheader'] = "Approval required for membership
 $string['membershipcategoryapprovals'] = "Choose whether each memebrship category doesn't require approval. Checking the box means that the chosen membership category DOES NOT require additional approval.";
 $string['auth_apoarecaptcha_key'] = "Recaptcha enabled";
 $string['auth_apoarecaptcha_key_desc'] = "Choose whter";
+
+$string['choosemaintitle'] = 'Choose your APOA subscription';
+$string['choosemaintitle_desc'] = "Thank you for signing up for APOAonline.com. <br> There's one final step before becoming a member of the APOA, you need to choose the length of your subscription. 
+<br>Choose your preferred subscription option below.";
+
+$string['choosesectionstitle'] = 'Choose from the APOA sections';
+$string['choosesectionstitle_desc'] = "Members of the APOA can also join any of the APOA's 13 specialty sections. Below you can select which sections you wish to join.";
+
+$string['dontjoinsection'] = "I don't wish to join this section";
+$string['subscriptionoptionlabel'] = '{$a->name} <br> {$a->cost} {$a->currency}';

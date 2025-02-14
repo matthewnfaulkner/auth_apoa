@@ -78,14 +78,23 @@ if (!empty($data) || (!empty($p) && !empty($s))) {
 
         if (!$user->suspended) {
 
-            $authplugin->enrol_existing_member($user);
+            $existing = $authplugin->enrol_existing_member($user);
             send_welcome_message($user);
             complete_user_login($user);
 
             \core\session\manager::apply_concurrent_login_limit($user->id, session_id());
 
+            $manager = new \core_privacy\local\sitepolicy\manager();
+            $manager->accept();
+
             // Check where to go, $redirect has a higher preference.
             if (!empty($redirect)) {
+                if(!$existing) {
+
+                    $skipmain = $user->profile_field_membership_category == 'Federation Fellow' ? 1 : 0;
+                    $subscribeurl = new moodle_url('/auth/apoa/signup_subscriptions.php', array('skip' => $skipmain));
+                    redirect($subscribeurl);
+                }
                 if (!empty($SESSION->wantsurl)) {
                     unset($SESSION->wantsurl);
                 }
