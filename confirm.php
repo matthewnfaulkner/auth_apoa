@@ -91,7 +91,7 @@ if (!empty($data) || (!empty($p) && !empty($s))) {
             if (!empty($redirect)) {
                 if(!$existing) {
 
-                    $skipmain = $user->profile_field_membership_category == 'Federation Fellow' ? 1 : 0;
+                    $skipmain = $user->profile_field_membership_category == 'Federation Fellow' ? 1 : null;
                     $subscribeurl = new moodle_url('/auth/apoa/signup_subscriptions.php', array('skip' => $skipmain));
                     redirect($subscribeurl);
                 }
