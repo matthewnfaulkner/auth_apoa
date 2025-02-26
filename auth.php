@@ -163,15 +163,12 @@ class auth_plugin_apoa extends auth_plugin_email {
 
         // Save any custom profile field information.
         profile_save_data($user);
-        
-        $manager = new \core_privacy\local\sitepolicy\manager();
-        $manager->accept();
 
 
         // Save wantsurl against user's profile, so we can return them there upon confirmation.
         if (!empty($SESSION->wantsurl)) {
             if($SESSION->wantsurl == $CFG->wwwroot . '/'){
-                $redirect = $redirect =  new moodle_url('/local/landingpage/index.php');
+                $redirect =  new moodle_url('/local/landingpage/index.php');
             }
             set_user_preference('auth_email_wantsurl', $SESSION->wantsurl, $user);
         }
@@ -910,6 +907,8 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
                     $plugin->enrol_user($instance, $user->id, 5, 0, $enddate, ENROL_USER_ACTIVE);
                 }
             }
+
+            return true;
         }
         
         return false;
