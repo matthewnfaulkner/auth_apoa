@@ -84,12 +84,15 @@ class signup_subscriptions_form2 extends \moodleform {
             }
             foreach($subscriptions as $subscription) {
                 $enrolmentoptions = enrol_get_instances($subscription->id, true);
+
+                $mform->addElement('header', 'header' . $subscription->id, $subscription->fullname);
+                
                 $radioarray=array();
                 $radioarray[] = $mform->createElement('radio', $subscription->id, '', get_string('none'), 0);
                 foreach($enrolmentoptions as $option) {
                     
                     $plugin = enrol_get_plugin($option->enrol);
-
+                    
                     if($plugin->show_enrolme_link($option)) {
                         $radioarray[] = $mform->createElement('radio', $subscription->id, '', format_text($option->name), $option->id);
                     }

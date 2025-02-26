@@ -71,12 +71,13 @@ class auth_plugin_apoa extends auth_plugin_email {
      * @return moodle_form A form which edits a record from the user table.
      */
     function signup_form() {
-        global $CFG;
+        global $CFG, $PAGE;
         $this->get_subscription_headers();
         $params = array('path' => $_POST['path'], 
         'emailexists' =>$_POST['emailexists'], 
         'createuser' => $_POST['submitbutton'],
-        'makenewuser' => $_POST['makenewuser'],);
+        'makenewuser' => $_POST['makenewuser'],
+        'fromcore' => $PAGE->pagetype == 'auth-apoa-signup' ? 0 : 1);
         return new signup_form(null, $params, 'post', '', array('autocomplete'=>'on'));
     }
 

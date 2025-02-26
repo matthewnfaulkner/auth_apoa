@@ -79,6 +79,7 @@ core_login_pre_signup_requests();
 
 $mform_signup = $authplugin->signup_form();
 
+
 if ($mform_signup->is_cancelled()) {
     redirect(get_login_url());
 

@@ -55,11 +55,19 @@ class signup_form extends \login_signup_form {
             $this->path = 0;
         };
 
+        if($this->_customdata['fromauth']){
+            $this->path = 0;
+        };
+
         $mform = $this->_form;
 
         $mform->addElement('hidden', 'path', $this->path);
         $mform->setType('id', PARAM_INT);
         $mform->setDefault('id', 0);
+
+        if($this->_customdata['fromcore']){
+            $this->set_display_vertical();
+        }
 
         if(!$this->path){
 
@@ -143,7 +151,8 @@ class signup_form extends \login_signup_form {
             $manager->signup_form($mform);
 
             // buttons
-            $this->set_display_vertical();
+
+
             $this->add_action_buttons(true, get_string('createaccount'));
         }
         else if($this->path == 1){

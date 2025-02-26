@@ -122,7 +122,11 @@ class signupexisting_form extends \login_signup_form {
         $manager->signup_form($mform);
 
         // buttons
-        $this->set_display_vertical();
+        //
+        if($this->_customdata['fromauth']){
+            $this->set_display_vertical();
+        }
+
         $this->add_action_buttons(true, get_string('createaccount'));
 
     }
