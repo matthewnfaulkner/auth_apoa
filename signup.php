@@ -113,7 +113,7 @@ echo  $OUTPUT->addblockbutton();
 
 echo $OUTPUT->custom_block_region('content');
 
-echo $OUTPUT->box_start('general col-12 col-lg-8 col-xl-6 m-auto');
+echo $OUTPUT->box_start('general col-12 col-lg-9 col-xl-9 m-auto');
 if ($mform_signup instanceof renderable) {
     // Try and use the renderer from the auth plugin if it exists.
     try {
