@@ -92,8 +92,6 @@ class signup_subscriptions_form2 extends \moodleform {
                 $mform->setExpanded('header_' . $subscription->id);
 
                 $enrolmentoptions = enrol_get_instances($subscription->id, true);
-
-                $mform->addElement('header', 'header' . $subscription->id, $subscription->fullname);
                 
                 $radioarray=array();
                 $radioarray[] = $mform->createElement('radio', $subscription->id, '', get_string('dontjoinsection', 'auth_apoa'), 0);

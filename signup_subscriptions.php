@@ -49,7 +49,8 @@ if (empty($skip)) {
 
         echo $OUTPUT->heading($choosemaintitle, 2, 'text-primary');
 
-        echo $OUTPUT->paragraph($choosemaindescription, 'text-primary');
+        echo \html_writer::tag('p', $choosemaindescription, array('class' => 'text-primary'));
+        //echo $OUTPUT->paragraph($choosemaindescription, 'text-primary');
 
         $mform1->display();
 
@@ -84,7 +85,7 @@ $PAGE->set_heading($SITE->fullname);
 echo $OUTPUT->header();
 
 echo $OUTPUT->heading($choosesectionstitle, 2, 'text-primary');
-echo $OUTPUT->paragraph($choosesectionsdescription, 'text-primary');
+echo \html_writer::tag('p', $choosesectionsdescription, array('class' => 'text-primary'));
 
 $mform2->display();
 

@@ -95,7 +95,7 @@ if ($mform_signup->is_cancelled()) {
 }
 
 
-$newaccount = get_string('signup');
+$newaccount = get_string('signup', 'auth_apoa');
 $login      = get_string('signup');
 
 $PAGE->navbar->add($login);

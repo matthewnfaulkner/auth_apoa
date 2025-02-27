@@ -264,3 +264,4 @@ $string['choosesectionstitle_desc'] = "Members of the APOA can also join any of 
 
 $string['dontjoinsection'] = "I don't wish to join this section";
 $string['subscriptionoptionlabel'] = '{$a->name} <br> {$a->cost} {$a->currency}';
+$string['signup'] = 'Join the APOA';
