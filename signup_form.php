@@ -45,7 +45,7 @@ class signup_form extends \login_signup_form {
         global $USER, $CFG;
         
         $this->path =  optional_param('path', 0, PARAM_INT);
-
+        $email =  optional_param('email', '', PARAM_EMAIL);
 
         if($this->_customdata['path']){
             $this->path = $this->_customdata['path'];
@@ -164,13 +164,19 @@ class signup_form extends \login_signup_form {
             $mform->setType('email', core_user::get_property_type('email'));
             $mform->addRule('email', get_string('missingemail'), 'required', null, 'server');
             $mform->setForceLtr('email');
-
+            $mform->setDefault('email', $email);
+            
+            if($email){
+                $submitlabel = get_string('continuetoaccountcreation', 'auth_apoa');
+            }else{
+                $submitlabel = get_string('checkexistingemail', 'auth_apoa');
+            }
             
             // Hook for plugins to extend form definition.
             core_login_extend_signup_form($mform);
 
             $buttonarray=array();   
-            $buttonarray[] = $mform->createElement('submit', 'existingemail', get_string('checkexistingemail', 'auth_apoa'));
+            $buttonarray[] = $mform->createElement('submit', 'existingemail', $submitlabel);
             $buttonarray[] = $mform->createElement('cancel');
             $mform->addGroup($buttonarray, 'buttonemail', '', array(' '), false);
             $mform->closeHeaderBefore('buttonemail');

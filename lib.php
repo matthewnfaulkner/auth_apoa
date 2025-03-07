@@ -373,3 +373,30 @@ function process_subscriptions_form($formdata) {
         
     }
 }
+
+
+function auth_apoa_post_forgot_password_requests($data){
+    global $DB;
+
+    if(!$email = $data->email){
+        return;
+    }
+
+    $sql = 'SELECT a.id
+            FROM {auth_apoa} a LEFT JOIN {user} u ON a.email = u.email
+            WHERE a.email = :email AND u.email IS NULL';
+            
+    $params = array(
+        'email' => $email
+    );
+
+    if($DB->record_exists_sql($sql, $params)) {
+        if($DB->record_exists('auth_apoa', array('email' => $email))){
+            $userauth = get_auth_plugin('apoa');
+            if (!$userauth->can_reset_password() or !is_enabled_auth('apoa')){
+                throw new \moodle_exception('cannotmailconfirm');
+            }
+            redirect(new moodle_url('/login/signup.php', array('path' => 1, 'email'=> $email)), get_string('forgottenpasswordemailexists', 'auth_apoa'));
+        }
+    }
+}

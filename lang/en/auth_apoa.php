@@ -265,3 +265,5 @@ $string['choosesectionstitle_desc'] = "Members of the APOA can also join any of 
 $string['dontjoinsection'] = "I don't wish to join this section";
 $string['subscriptionoptionlabel'] = '{$a->name} <br> {$a->cost} {$a->currency}';
 $string['signup'] = 'Join the APOA';
+$string['forgottenpasswordemailexists'] = "We cannot reset your password, although we have a record of your membership, you are yet to create an account on APOAonline.com, please proceed below to create your account";
+$string['continuetoaccountcreation'] =  'Create my account';
