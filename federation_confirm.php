@@ -77,6 +77,7 @@ if (!empty($data) || (!empty($p) && !empty($s))) {
         }
         send_welcome_message($user);
         $authplugin->send_federation_confirm_to_user($user);
+        $authplugin->approve_membership_category($user);
 
         $PAGE->navbar->add(get_string("confirmed"));
         $PAGE->set_title(get_string("confirmed"));

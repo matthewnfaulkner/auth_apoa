@@ -146,15 +146,8 @@ class auth_plugin_apoa extends auth_plugin_email {
         if (empty($user->calendartype)) {
             $user->calendartype = $CFG->calendartype;
         }
-        $membershipcategory = $user->profile_field_membership_category;
 
-        $categoryclass = membership_category_class($membershipcategory);
-        if(!$categoryclass->approve()){
-            $approvalneeded = $categoryclass->add_approval_request(new stdClass(), $user);
-            $user->profile_field_membership_category_approved = 0;
-        }else{
-            $user->profile_field_membership_category_approved = 1;
-        }
+        $user->profile_field_membership_category_approved = 0;
 
         $user->profile_field_hasactivesubscription = 0;
         $user->id = user_create_user($user, false, false);
@@ -848,6 +841,19 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
         };
         return array_keys($columns);
 
+    }
+
+    public function approve_membership_category($user) {
+        global $DB;
+
+        $profilefields = $user->profile;
+        $categoryclass = membership_category_class($profilefields['membership_category']);
+        if(!$categoryclass->approve()){
+            $approvalneeded = $categoryclass->add_approval_request(new stdClass(), $user);
+        }else{
+            $user->profile_field_membership_category_approved = 1;
+            profile_save_data($user);
+        }
     }
 
     public function enrol_existing_member($user){

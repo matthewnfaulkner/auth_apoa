@@ -79,6 +79,7 @@ if (!empty($data) || (!empty($p) && !empty($s))) {
         if (!$user->suspended) {
 
             $existing = $authplugin->enrol_existing_member($user);
+            $authplugin->approve_membership_category($user);
             send_welcome_message($user);
             complete_user_login($user);
 

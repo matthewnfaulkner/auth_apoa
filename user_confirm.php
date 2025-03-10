@@ -80,7 +80,7 @@ if (!empty($data) || (!empty($p) && !empty($s))) {
         if (!$user->suspended) {
 
             $authplugin->send_confirmation_email_to_federation($user, $federation);
-
+            
             //$confirmationurl = new moodle_url('/auth/apoa/federation_confirm.php', array('data' => "$user->secret/$user->username"));
             //redirect($confirmationurl->out());
 
