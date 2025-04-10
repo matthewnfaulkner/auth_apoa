@@ -73,26 +73,6 @@ if (\core_auth\digital_consent::is_age_digital_consent_verification_enabled()) {
     }
 }
 
-// Plugins can create pre sign up requests.
-// Can be used to force additional actions before sign up such as acceptance of policies, validations, etc.
-core_login_pre_signup_requests();
-
-$mform_signup = $authplugin->signup_form();
-
-
-if ($mform_signup->is_cancelled()) {
-    redirect(get_login_url());
-
-} else if ($user = $mform_signup->get_data()) {
-    // Add missing required fields.
-    $user = signup_setup_new_user($user);
-
-    // Plugins can perform post sign up actions once data has been validated.
-    core_login_post_signup_requests($user);
-
-    $authplugin->user_signup($user, true); // prints notice and link to login/index.php
-    exit; //never reached
-}
 
 
 $newaccount = get_string('signup', 'auth_apoa');
@@ -114,19 +94,6 @@ echo  $OUTPUT->addblockbutton();
 echo $OUTPUT->custom_block_region('content');
 
 echo $OUTPUT->box_start('general col-12 col-lg-9 col-xl-9 m-auto');
-if ($mform_signup instanceof renderable) {
-    // Try and use the renderer from the auth plugin if it exists.
-    try {
-        $renderer = $PAGE->get_renderer('auth_' . $authplugin->authtype);
-    } catch (coding_exception $ce) {
-        // Fall back on the general renderer.
-        $renderer = $OUTPUT;
-    }
-    echo $renderer->render($mform_signup);
-} else {
-    // Fall back for auth plugins not using renderables.
-    $mform_signup->display();
-}
-
+echo $OUTPUT->single_button(get_login_url(), 'Proceed to Sign Up');
 echo $OUTPUT->box_end();
 echo $OUTPUT->footer();
