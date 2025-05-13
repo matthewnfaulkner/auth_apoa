@@ -75,8 +75,11 @@ abstract class membership_category {
         $newapproval->previouslyapproved = $formdata->previouslyapproved;
         } 
 
-        return $DB->insert_record('auth_apoa_membershipchanges', $newapproval);
+        if($DB->insert_record('auth_apoa_membershipchanges', $newapproval, false)){
+            return 1;
+        }
 
+        return 0;
         
 
     }

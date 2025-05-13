@@ -31,7 +31,9 @@ define('MEMBERSHIP_APPROVED', 2);
 define('MEMBERSHIP_DENIED', 0);
 define('MEMBERSHIP_AMENDED', 1);
 
-
+define('FEDERATION_ACTIVE', 0);
+define('FEDERATION_LAPSED', 1);
+define('FEDERATION_INACTIVE', 2);
 use core\event\notification_sent;
 use core_course\task\content_notification_task;
 use \core_message\api as api;
@@ -65,7 +67,7 @@ function is_membership_category_approved(){
     global $USER;
 
     $cache = \cache::make('auth_apoa', 'membership_category_approved_cache');
-    
+
     $cachekey = "u_$USER->id";
     if ($data = $cache->get($cachekey)){
         return $data;
@@ -74,8 +76,10 @@ function is_membership_category_approved(){
         if($profile = profile_user_record($USER->id)){
             $membership_category_approved = $profile->membership_category_approved;
             $membership_category = $profile->membership_category;
+            $federation = $profile->federation;
             $membershipfields = array('membership_category_approved' => $membership_category_approved,
-                    'membership_category' => $membership_category);
+                    'membership_category' => $membership_category,
+                    'federation' => $federation);
             $cache->set($cachekey, $membershipfields);
             return $membershipfields;
         }
@@ -89,7 +93,7 @@ function country_to_federation($country){
         'brunei' => 'Brunei',
         'cambodia' => 'Cambodia',
         'china' => 'China',
-        'hongkong' => 'Hong Kong',
+        'hongkong' => 'HongKong',
         'india' => 'India',
         'indonesia' => 'Indonesia',
         'japan' => 'Japan',
@@ -100,13 +104,13 @@ function country_to_federation($country){
         'oman' => 'Oman',
         'pakistan' => 'Pakistan',
         'philippines' => 'Philippines',
-        'saudiarabia' => 'Saudi Arabia',
+        'saudiarabia' => 'SaudiArabia',
         'singapore' => 'Singapore',
-        'srilanka' => 'Sri Lanka',
+        'srilanka' => 'SriLanka',
         'taiwan' => 'Taiwan',
         'thailand' => 'Thailand',
         'turkey' => 'Turkey',
-        'unitedarabemirates' => 'United Arab Emirates',
+        'uae' => 'UAE',
         'vietnam' => 'Vietnam');
 
     return $mapping[$country];
@@ -140,22 +144,33 @@ function auth_apoa_user_created($event){
     send_welcome_message($user);
 }
 
-function validate_existing_email($email){
+function validate_existing_email($email, $path){
     global $DB;
-    if($authrecord =  $DB->get_record('auth_apoa', array('email' => $email))){
-        if($authrecord->membership_category == 'Federation' || $authrecord->membership_category == 'Federation Fellow'){
-            if(country_to_federation($authrecord->country)){
-                $authrecord->membership_category = 'Federation Fellow';
-            }
-            else{
-                $authrecord->membership_category = 'Affiliate Federation Fellow';
-            }
-        }
-        if($authrecord->membership_category == 'Paramedical / Affiliate Member'){
-            $authrecord->membership_category = 'Affiliate Member';
-        }
-        return $authrecord;
-    };
+
+    if($path == 1){
+        if($authrecord =  $DB->get_record('auth_apoa', array('email' => $email))){
+                if($authrecord->membership_category == 'Federation' || $authrecord->membership_category == 'Federation Fellow'){
+                    if(country_to_federation($authrecord->country)){
+                        $authrecord->membership_category = 'Federation Fellow';
+                    }
+                    else{
+                        $authrecord->membership_category = 'Affiliate Federation Fellow';
+                    }
+                }
+                if($authrecord->membership_category == 'Paramedical / Affiliate Member'){
+                    $authrecord->membership_category = 'Affiliate Member';
+                }
+                return $authrecord;
+            };
+    }
+    if($path == 2) {
+        if($authrecord =  $DB->get_record('auth_apoa_federation_members', array('email' => $email))){
+            $authrecord->membership_category = 'Federation Fellow';
+            $authrecord->country = $authrecord->federation;
+            $authrecord->id = 0;
+            return $authrecord;
+        };
+    }
     return false;
 }
 
@@ -399,4 +414,147 @@ function auth_apoa_post_forgot_password_requests($data){
             redirect(new moodle_url('/login/signup.php', array('path' => 1, 'email'=> $email)), get_string('forgottenpasswordemailexists', 'auth_apoa'));
         }
     }
+}
+
+function auth_apoa_update_federation_statuses($setting) {
+    global $DB; 
+    
+    $federation = str_replace('s_auth_apoa_federationstatus', '', $setting);
+    $status = get_config('auth_apoa', 'federationstatus' . $federation);
+    $federation = country_to_federation($federation);
+
+    if(!$federation) {
+        return;
+    }
+
+    $lastruleorder = $DB->get_record_sql("SELECT MAX(sortorder) as total FROM {local_profilecohort}");
+    $totalrules = $lastruleorder->total;
+
+    $federationfield = profile_get_custom_field_data_by_shortname('federation');
+    $categoryfield =   profile_get_custom_field_data_by_shortname('membership_category');
+    $approvedfield =   profile_get_custom_field_data_by_shortname('membership_category_approved');
+
+    $matchvalue = $DB->sql_compare_text('matchvalue');
+    $matchvalueplaceholder = $DB->sql_compare_text(':matchvalue');
+
+    $rulessql = "SELECT * FROM {local_profilecohort} WHERE {$matchvalue} = {$matchvalueplaceholder} AND 
+            fieldid = :fieldid";
+    $rulesparams = [
+        'matchvalue' => $federation,
+        'fieldid' => $federationfield->id
+    ];
+
+    if($rule = $DB->get_record_sql($rulessql, $rulesparams)){
+        if($status == FEDERATION_INACTIVE) {
+            $getnextrules = "SELECT * FROM {local_profilecohort} lcp
+                            WHERE (lcp.sortorder = :sortone AND lcp.fieldid = :categoryid AND lcp.andnextrule =1) OR
+                            (lcp.sortorder = :sorttwo AND lcp.fieldid = :approvedid AND lcp.andnextrule = 0)
+                            ORDER BY lcp.sortorder";
+            $params = [
+                'sortone' => $rule->sortorder+1,
+                'categoryid' => $categoryfield->id,
+                'sorttwo' => $rule->sortorder+2,
+                'approvedid' => $approvedfield->id,
+            ];
+            if($nextrules = $DB->get_records_sql($getnextrules, $params)){
+                if(count($nextrules) == 2 && $status = FEDERATION_INACTIVE){
+                    $ids = array_merge([$rule->id], array_keys($nextrules));
+                    $DB->delete_records_list('local_profilecohort', 'id', $ids);
+                }
+            }
+        }
+    }else{
+        if($status == FEDERATION_ACTIVE || $status == FEDERATION_LAPSED){
+                
+            $ruleone = new stdClass();
+            $ruleone->fieldid = $federationfield->id;
+            $ruleone->matchtype = NULL;
+            $ruleone->matchvalue = $federation;
+            $ruleone->value = 22;
+            $ruleone->sortorder = $totalrules+1;    
+            $ruleone->andnextrule = 1;
+
+            $ruletwo = new stdClass();
+            $ruletwo->fieldid = $categoryfield->id;
+            $ruletwo->matchtype = NULL;
+            $ruletwo->matchvalue = "Federation Fellow";
+            $ruletwo->value = 22;
+            $ruletwo->sortorder = $totalrules+2;
+            $ruletwo->andnextrule = 1;
+
+            $rulethree = new stdClass();
+            $rulethree->fieldid = $approvedfield->id;
+            $rulethree->matchtype = NULL;
+            $rulethree->matchvalue = 1;
+            $rulethree->value = 22;
+            $rulethree->sortorder = $totalrules+3;
+            $rulethree->andnextrule = 0;
+            $DB->insert_records('local_profilecohort', [$ruleone, $ruletwo, $rulethree]);
+        }
+    }
+
+}
+
+function auth_apoa_clear_apoa_notification_preferences($cutoff) {
+    global $DB;
+
+    $select = 'name = ? AND value < ?';
+
+    foreach(auth_apoa_user_preferences() as $preference => $config){
+        $DB->delete_records_select("user_preferences", $select, [$preference, $cutoff]);
+    }
+}
+
+function auth_apoa_display_notification_before_main(){
+    $preference = 'auth_apoa_user_notapproved';
+    $membershipfields = is_membership_category_approved();
+    
+    if($membershipfields['membership_category'] == "Federation Fellow"){
+        $federation = strtolower(preg_replace('/[^A-Za-z]/', '', $membershipfields['federation']));
+        if($status = get_config('auth_apoa', "federationstatus$federation")){
+            $notification = format_text(get_config('auth_apoa', "federationnotification$federation"));
+            switch ($status) {
+                case FEDERATION_ACTIVE:
+                    if($membershipfields['membership_category_approved']){
+                        $message = get_string('federationpending', 'auth_apoa');
+                        return [$message, $preference];
+                    }
+                    break;
+                case FEDERATION_LAPSED:
+                    if($membershipfields['membership_category_approved']){
+                        $message = get_string('federationlapsed', 'auth_apoa', $notification);
+                        return [$message, $preference];
+                    }
+                    break;
+                case FEDERATION_INACTIVE:
+                    $message = get_string('federationexpired', 'auth_apoa', $notification);
+                    return [$message, $preference];
+                default:
+                    break;
+            }
+            
+        }
+    }
+
+    if(!$membershipfields['membership_category_approved']){
+        if($membershipfields['membership_category'] == "No Membership"){
+            $message = get_string('nomembershippending', 'auth_apoa');
+        }
+        else{
+            $message = get_string('membershipcategoryapprovalpending', 'auth_apoa', $membershipfields['membership_category']);
+        }
+    return [$message, $preference];
+    }
+    else{
+
+    }
+}
+
+function auth_apoa_user_preferences(){
+    return ['auth_apoa_user_notapproved'=> [
+                'type' =>   PARAM_INT,
+                'null' => NULL_ALLOWED,
+                'default' => 0,
+                'permissioncallback' => [core_user::class, 'is_current_user'],
+        ]];
 }

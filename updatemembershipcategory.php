@@ -126,10 +126,12 @@ if($formdata = $mform->get_data()){
         if($categoryclass = membership_category_class($formdata->profile_field_membership_category)){
             $formdata->previouscategory = $profilefields->membership_category;
             $formdata->previouslyapproved = $profilefields->membership_category_approved;
-            $formdata->profile_field_membership_category_approved = (int)$categoryclass->approve();
-            $categoryclass->add_approval_request($formdata);
+            $formdata->profile_field_membership_category_approved = $categoryclass->add_approval_request($formdata);
             
             profile_save_data($formdata);
+            $cache = \cache::make('auth_apoa', 'membership_category_approved_cache');
+            $cachekey = "u_$user->id";
+            $cache->delete($cachekey);
             \core\event\user_updated::create_from_userid($user->id)->trigger();
         }
     }

@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 
 
 $string['pluginname'] = 'APOA Authentication';
-
+$string['auth_apoadescription'] = 'APOA authentication extends email authentication with support to authenticate pre-existing APOA users.';
 $string['auth_emailnofederationemail'] = 'No email address for this federaion';
 $string['pathnewtitle'] = 'New Member';
 $string['passwordagain'] = 'Re-enter password';
@@ -267,3 +267,21 @@ $string['subscriptionoptionlabel'] = '{$a->name} <br> {$a->cost} {$a->currency}'
 $string['signup'] = 'Join the APOA';
 $string['forgottenpasswordemailexists'] = "We cannot reset your password, although we have a record of your membership, you are yet to create an account on APOAonline.com, please proceed below to create your account";
 $string['continuetoaccountcreation'] =  'Create my account';
+
+$string['syncfederationmembers'] = 'Synchronize federation members with apoaonline users';
+
+$string['membershipchangednotapproved'] = 'Membership Category change to federation member denied, no record of user in federation members';
+$string['membershipchangedapproved'] = 'Membership Category changed to federation fellow successfully';
+$string['pendingfederationapproval'] = 'Membership Category change pending approval by federation';
+$string['federationmembershipexpired'] = 'The records we have from your federation indicate your membership to your federation has expired.';
+
+$string['federationpending'] = 'Still waiting for your federation to confirm your membership. Your experience will be limited until they do.';
+$string['dontshowmessageagain'] = '(Don\'t show this message again)';
+$string['membershipcategoryapprovalpending'] = 'You haven\'t yet been approved as a {$a}. Your experience will be limited until you are.';
+$string['nomembershippending'] = "You currently are not a confirmed member of APOA.";
+$string['federationlapsed'] = 'Your national orthopaedic association has not paid its APOA subscription. You are at risk of losing your APOA membership. {$a}';
+$string['federationexpired'] = 'Your national orthopaedic association is no longer a member of the APOA. {$a}';
+
+$string['federationstatus_desc'] = 'Status of national associations APOA membership';
+$string['federationnotification_desc'] = 'Message displayed to federation fellows of this national orthopaedic association if status has lapsed or is expired.';
+$string['federationemail_desc'] = 'Email address of national assocation, if present approval requests are sent to this email address.';

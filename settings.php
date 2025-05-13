@@ -66,18 +66,41 @@ if ($ADMIN->fulltree) {
 
     }
 
-    $settings->add(new admin_setting_heading('auth_apoa/federationemails',  new lang_string('federationemailsheader', 'auth_apoa'),
-        new lang_string('federationemails', 'auth_apoa')));
-
     $federationfield = $DB->get_record('user_info_field', array('shortname' => 'federation'));
     $federations = explode("\n", $federationfield->param1);
     foreach($federations as $federation){
+        if(!$federation) {
+            continue;
+        }
         $formattedsetting = strtolower(preg_replace('/[^A-Za-z]/', '', $federation));
+
+        $settings->add(new admin_setting_heading('auth_apoa/federationdiv' . $formattedsetting, $federation, $federation));
+
         $settings->add(new admin_setting_configtext('auth_apoa/federationemail' . $formattedsetting,
-            $federation,
-            '',
+            $federation . " Email Contact",
+            new lang_string('federationemail_desc', 'auth_apoa'),
             '',
             PARAM_EMAIL));
+
+        $statuses = [FEDERATION_ACTIVE => 'Active', 
+                     FEDERATION_LAPSED => 'Lapsed', 
+                     FEDERATION_INACTIVE => 'Inactive'];
+
+        $setting =  new admin_setting_configselect('auth_apoa/federationstatus' . $formattedsetting, 
+                $federation . ' Status',
+                new lang_string('federationstatus_desc', 'auth_apoa'),
+                2,
+                $statuses
+        );
+        $setting->set_updatedcallback('auth_apoa_update_federation_statuses');          
+        $settings->add($setting);
+
+        $settings->add(new admin_setting_confightmleditor('auth_apoa/federationnotification' . $formattedsetting,
+            $federation . " Notification",
+            new lang_string('federationnotification_desc', 'auth_apoa'),
+            '',
+            PARAM_RAW));
+        
     }
 
     $settings->add(new admin_setting_heading('auth_apoa/membershipcategoryapprovals',  new lang_string('membershipcategoryapprovalsheader', 'auth_apoa'),
@@ -86,7 +109,7 @@ if ($ADMIN->fulltree) {
 
     $membershipcategoryfield = $DB->get_record('user_info_field', array('shortname' => 'membership_category'));
     $membershipcategories = explode("\n", $membershipcategoryfield->param1);
-
+    
     foreach($membershipcategories as $category){
         $formattedsetting = strtolower(preg_replace('/[^A-Za-z]/', '', $category));
         $settings->add(new admin_setting_configcheckbox('auth_apoa/membershipcategoryapproval' . $formattedsetting,

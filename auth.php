@@ -61,7 +61,12 @@ class auth_plugin_apoa extends auth_plugin_email {
                 'existing' => array(
                     'path' => 1, 
                     'title' => get_string('pathexistingtitle', 'auth_apoa'), 
-                    'desc' => get_string('pathexistingdesc', 'auth_apoa')
+                    'desc' => get_string('pathexistingdesc', 'auth_apoa'),
+                'federation' => array(
+                    'path' => 2, 
+                    'title' => get_string('pathfederationtitle', 'auth_apoa'), 
+                    'desc' => get_string('pathfederationtitle', 'auth_apoa'),
+                )
             ));
     }
 

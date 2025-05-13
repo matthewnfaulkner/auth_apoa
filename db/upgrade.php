@@ -486,5 +486,47 @@ function xmldb_auth_apoa_upgrade($oldversion) {
     }
 
 
+    if ($oldversion < 2023062339) {
+
+        // Define table auth_apoa_federation_members to be created.
+        $table = new xmldb_table('auth_apoa_federation_members');
+
+        // Adding fields to table auth_apoa_federation_members.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('email', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('federation', XMLDB_TYPE_CHAR, '256', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('expires', XMLDB_TYPE_INTEGER, '13', null, XMLDB_NOTNULL, null, '0');
+
+        // Adding keys to table auth_apoa_federation_members.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Adding indexes to table auth_apoa_federation_members.
+        $table->add_index('email', XMLDB_INDEX_UNIQUE, ['email']);
+
+        // Conditionally launch create table for auth_apoa_federation_members.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Apoa savepoint reached.
+        upgrade_plugin_savepoint(true, 2023062339, 'auth', 'apoa');
+    }
+
+    if ($oldversion < 2023062340) {
+
+        // Define field name to be added to auth_apoa_federation_members.
+        $table = new xmldb_table('auth_apoa_federation_members');
+        $field = new xmldb_field('name', XMLDB_TYPE_CHAR, '256', null, XMLDB_NOTNULL, null, null, 'id');
+
+        // Conditionally launch add field name.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Apoa savepoint reached.
+        upgrade_plugin_savepoint(true, 2023062340, 'auth', 'apoa');
+    }
+
+
     return true;
 }

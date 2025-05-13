@@ -185,6 +185,36 @@ class signup_form extends \login_signup_form {
                 $this->existing_extra_form_elements();
             }
         }
+        else if($this->path == 2){
+            \MoodleQuickForm::registerElementType('checkabletext',
+                                         "$CFG->dirroot/$CFG->admin/tool/checkabletext/classes/checkabletext.php",
+                                         'tool_checkabletext\MoodleQuickForm_checkabletext');
+
+            $mform->addElement('checkabletext', 'email', get_string('email'), 'maxlength="100" size="25"');
+            $mform->setType('email', core_user::get_property_type('email'));
+            $mform->addRule('email', get_string('missingemail'), 'required', null, 'server');
+            $mform->setForceLtr('email');
+            $mform->setDefault('email', $email);
+            
+            if($email){
+                $submitlabel = get_string('continuetoaccountcreation', 'auth_apoa');
+            }else{
+                $submitlabel = get_string('checkexistingemail', 'auth_apoa');
+            }
+            
+            // Hook for plugins to extend form definition.
+            core_login_extend_signup_form($mform);
+
+            $buttonarray=array();   
+            $buttonarray[] = $mform->createElement('submit', 'existingemail', $submitlabel);
+            $buttonarray[] = $mform->createElement('cancel');
+            $mform->addGroup($buttonarray, 'buttonemail', '', array(' '), false);
+            $mform->closeHeaderBefore('buttonemail');
+            
+            if($this->_customdata['emailexists']){
+                $this->existing_extra_form_elements();
+            }
+        }
 
     }
 
