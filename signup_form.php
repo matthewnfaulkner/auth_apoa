@@ -479,7 +479,7 @@ class signup_form extends \login_signup_form {
             }
             $errors += signup_validate_data($data, $files);
             if(empty($errors['email'] && !$data['emailexists'])){
-                    if($user = validate_existing_email($data['email'])){
+                    if($user = validate_existing_email($data['email'], $this->path)){
                         $data['profile_field_membership_category'] = $user->membership_category;
                         if($user->membership_category == 'Federation Fellow' || $user->membership_category == 'Affiliate Federation Fellow'){
                             $data['profile_field_federation'] = country_to_federation($user->country);

@@ -89,7 +89,7 @@ class auth_apoa_external extends external_api {
                 'accountexists' => true,
             ];
         }
-        if($existinguser = validate_existing_email($params['email'])){
+        if($existinguser = validate_existing_email($params['email'], 1)){
             return [
                 'exists' => true,
                 'email'  => $existinguser->email,
