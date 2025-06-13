@@ -507,6 +507,11 @@ function auth_apoa_clear_apoa_notification_preferences($cutoff) {
 
 function auth_apoa_display_notification_before_main(){
     $preference = 'auth_apoa_user_notapproved';
+
+    if(get_user_preferences($preference)){
+        return;
+    }
+    
     $membershipfields = is_membership_category_approved();
     
     if($membershipfields['membership_category'] == "Federation Fellow"){
