@@ -865,9 +865,10 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
         global $DB;
         $toenrolin = [];
         if($authrecord = $DB->get_record('auth_apoa', array('email' => $user->email, 'status' => 1))){
-           $lifemember = $authrecord->lifemembership;
-           $membershipcategory = $authrecord->membership_category;
 
+           $membershipcategory = $authrecord->membership_category;
+           $lifemember = $authrecord->lifemembership && $membershipcategory != "Federation Fellow";
+           
            if($user->profile_field_membership_category == null || $user->profile_field_membership_category == 'no membership') {
                 $user->profile_field_membership_category = $membershipcategory;
                 if($membershipcategory != 'Federation Fellow' && $membershipcategory != 'Affiliate Federation Fellow'){
@@ -883,7 +884,7 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
            else if ($subscriptionends > time()){
                 $toenrolin[$apoasubscription] = $subscriptionends;
            }
-            foreach($authrecord as $field => $value){
+           foreach($authrecord as $field => $value){
                 $subscription = get_config('auth_apoa', 'subscription' . $field);
                 $enrolmentperiod = 0;
                 if($field == 'spine'){
