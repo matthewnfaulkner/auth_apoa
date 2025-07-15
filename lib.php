@@ -101,7 +101,9 @@ function country_to_federation($country){
         'malaysia' => 'Malaysia',
         'myanmar' => 'Myanmar',
         'nepal' => 'Nepal',
+        'newzealand' => 'New Zealand',
         'oman' => 'Oman',
+        'pioa' => 'Pacific Islands',
         'pakistan' => 'Pakistan',
         'philippines' => 'Philippines',
         'saudiarabia' => 'SaudiArabia',
@@ -511,7 +513,7 @@ function auth_apoa_display_notification_before_main(){
     if(get_user_preferences($preference)){
         return;
     }
-    
+
     $membershipfields = is_membership_category_approved();
     
     if($membershipfields['membership_category'] == "Federation Fellow"){

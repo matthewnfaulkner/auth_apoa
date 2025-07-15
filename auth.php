@@ -155,6 +155,14 @@ class auth_plugin_apoa extends auth_plugin_email {
         $user->profile_field_membership_category_approved = 0;
 
         $user->profile_field_hasactivesubscription = 0;
+
+        //incredibly rudimentary way of suspending bots
+        //based on observation that all bots would use their username for the training program name
+        //this would never be true of a human user.
+        if($user->username == $user->profile_field_trainingprogram) {
+            $user->suspended = 1;
+        }
+
         $user->id = user_create_user($user, false, false);
 
         user_add_password_history($user->id, $plainpassword);
@@ -162,7 +170,7 @@ class auth_plugin_apoa extends auth_plugin_email {
         // Save any custom profile field information.
         profile_save_data($user);
 
-
+        
         // Save wantsurl against user's profile, so we can return them there upon confirmation.
         if (!empty($SESSION->wantsurl)) {
             if($SESSION->wantsurl == $CFG->wwwroot . '/'){
@@ -182,12 +190,18 @@ class auth_plugin_apoa extends auth_plugin_email {
             $confirmationurl = new moodle_url('/auth/apoa/confirm.php', array('data' => "$user->secret/$user->username", 'redirect' => $redirect));
         }
         
+
         if($this->noemailmode){
             redirect($confirmationurl);
         }
-        if (! $this->send_confirmation_email($user, $confirmationurl)) {
+
+        //do not send confirmation to bots, detected by name of training program matching username
+        //pretty dumb detection method but for now all bots do this.
+
+        if (!$this->send_confirmation_email($user, $confirmationurl)) {
             throw new \moodle_exception('auth_emailnoemail', 'auth_email');
         }
+        
 
         if ($notify) {
             global $CFG, $PAGE, $OUTPUT;
