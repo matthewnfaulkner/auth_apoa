@@ -285,3 +285,29 @@ $string['federationexpired'] = 'Your national orthopaedic association is no long
 $string['federationstatus_desc'] = 'Status of national associations APOA membership';
 $string['federationnotification_desc'] = 'Message displayed to federation fellows of this national orthopaedic association if status has lapsed or is expired.';
 $string['federationemail_desc'] = 'Email address of national assocation, if present approval requests are sent to this email address.';
+
+$string['authapoasettings'] = 'APOA Authentication Settings';
+$string['generalsettings'] = 'General Settings';
+$string['subscriptionmappings'] = 'Subscription Mappings';
+$string['federationsettings'] = 'Federation Settings';
+$string['chaptersettings'] = 'Chapter Settings';
+$string['chapters'] = 'APOA Chapters';
+$string['chapters_desc'] = 'Select the countries that have APOA Chapters';
+$string['chaptercohortdescription'] = '<p dir="ltr" style="text-align: left;">Members of the APOA National Chapter for {$a}</p>';
+$string['chaptercohortrules'] = '<p dir="ltr" style="text-align: left;">
+   Rules for membership to cohort $a Chaper Members:
+   <ul>
+      <li>
+         Is Not Federation or Affiliate Federation Member.
+      </li>
+      <li>
+         Has Active APOA subscription
+      </li>
+      <li>
+         Membership category has been approved.
+      </li>
+      <li>
+         They\'re profile country is set to $a
+      </li>
+   </ul>
+   </p>';

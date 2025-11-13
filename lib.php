@@ -418,6 +418,206 @@ function auth_apoa_post_forgot_password_requests($data){
     }
 }
 
+function auth_apoa_update_chapter_statuses($setting) {
+    global $DB;
+
+    $allcountries = array_merge(
+                get_string_manager()->get_list_of_countries(true));
+    
+    $configchapters = get_config('auth_apoa', 'chapters');
+
+    $selectedcountries = array_flip(explode(",", $configchapters));
+
+    foreach($allcountries as $key => $country) {
+        $cohortexists = cohort_get_cohorts(context_system::instance()->id, 0, 25, "$country Chapter Members");
+
+        $ischapter = array_key_exists($key, $selectedcountries);
+        if($ischapter && $cohortexists['totalcohorts'] === 0){
+            //cohort should exist but doesnt
+            $cohort = new stdClass();
+            $cohort->name = "$country Chapter Members";
+            $cohort->idnumber = "$country Chapter Members";
+            $cohort->contextid = 1;
+            $cohort->visible = 1;
+            $cohort->description = get_string('chaptercohortdescription', 'auth_apoa', $country);
+            $cohort->descriptionformat = 1;
+            $cohortid = cohort_add_cohort($cohort);
+
+            $ruledata = new stdClass();
+            $ruledata->id = 0;
+            $ruledata->name = "$country Chapter Members";
+            $ruledata->description = "";
+            $ruledata->cohortid = $cohortid;
+            $ruledata->conditionjson = create_chapter_dynamic_cohort_rules($key);
+            $ruledata->isconditionschanged = 1;
+            $ruledata->bulkprocessing = 1;
+            $ruledata->realtime = 0;
+            $ruledata->operator = 0;
+            
+            if($rule = \tool_dynamic_cohorts\rule_manager::process_form($ruledata)){
+                if($rule->is_broken(true)) {
+                    $rule->set('enabled', 1);
+                    $rule->save();
+                }
+            }
+        }
+        else if (!$ischapter && $cohortexists['totalcohorts'] > 0) {
+            //cohort should not exist
+            if($cohortexists['totalcohorts'] > 1){
+                throw new moodle_exception('More than one matching chapter cohort');
+            }
+            $cohort = reset($cohortexists['cohorts']);
+            $rules = $DB->get_records('tool_dynamic_cohorts', array('cohortid' => $cohort->id));
+            foreach($rules as $rule) {
+                $rule = new \tool_dynamic_cohorts\rule($rule->id, $rule);
+                \tool_dynamic_cohorts\rule_manager::delete_rule($rule);
+            }
+            \tool_dynamic_cohorts\cohort_manager::unmanage_cohort($cohort->id);
+            cohort_delete_cohort($cohort);
+        }
+    }
+}
+
+function create_chapter_dynamic_cohort_rules($country) {
+    // Create the first condition object
+    $condition1 = new stdClass();
+    $condition1->id = 0;
+    $condition1->sortorder = 0;
+    $condition1->classname = "tool_dynamic_cohorts\\local\\tool_dynamic_cohorts\\condition\\user_profile";
+
+    // Config data for condition 1
+    $configdata1 = new stdClass();
+    $configdata1->profilefield = "country";
+    $configdata1->country_operator = "3";
+    $configdata1->country_value = $country;
+    $condition1->configdata = json_encode($configdata1);
+
+    $condition1->description = get_string(
+        'condition:profile_field_description', 
+        'tool_dynamic_cohort', 
+        array(
+            'field' => 'Country',
+            'fieldoperator' => 'is equal to',
+            'fieldvalue' => $country
+        ));
+    $condition1->name = get_string('condition:user_profile', 'tool_dynamic_cohorts');
+
+
+    // Create the second condition object
+    $condition2 = new stdClass();
+    $condition2->id = 0;
+    $condition2->sortorder = 1;
+    $condition2->classname = "tool_dynamic_cohorts\\local\\tool_dynamic_cohorts\\condition\\user_custom_profile";
+
+    // Config data for condition 2
+    $configdata2 = new stdClass();
+    $configdata2->profilefield = "profile_field_membership_category";
+    $configdata2->profile_field_membership_category_operator = "8";
+    $configdata2->profile_field_membership_category_value = "Federation Fellow";
+    $configdata2->profile_field_membership_category_approved_operator = "3";
+    $configdata2->profile_field_membership_category_approved_value = "0";
+    $configdata2->include_missing_data = 0;
+    $condition2->configdata = json_encode($configdata2);
+
+    $condition2->description = get_string(
+        'condition:profile_field_description', 
+        'tool_dynamic_cohort', 
+        array(
+            'field' => 'Membership Category',
+            'fieldoperator' => 'not equal to',
+            'fieldvalue' => 'Federation Fellow'
+        ));
+
+    $condition2->name = get_string('condition:user_custom_profile', 'tool_dynamic_cohorts');
+
+    // Create the second condition object
+    $condition3 = new stdClass();
+    $condition3->id = 0;
+    $condition3->sortorder = 1;
+    $condition3->classname = "tool_dynamic_cohorts\\local\\tool_dynamic_cohorts\\condition\\user_custom_profile";
+
+    // Config data for condition 2
+    $configdata3= new stdClass();
+    $configdata3->profilefield = "profile_field_membership_category";
+    $configdata3->profile_field_membership_category_operator = "8";
+    $configdata3->profile_field_membership_category_value = "Affiliate Federation Fellow";
+    $configdata3->profile_field_membership_category_approved_operator = "3";
+    $configdata3->profile_field_membership_category_approved_value = "0";
+    $configdata3->include_missing_data = 0;
+    $condition3->configdata = json_encode($configdata3);
+
+     $condition3->description = get_string(
+        'condition:profile_field_description', 
+        'tool_dynamic_cohort', 
+        array(
+            'field' => 'Membership Category',
+            'fieldoperator' => 'not equal to',
+            'fieldvalue' => 'Affiliate Federation Fellow'
+        ));
+
+    $condition3->name = get_string('condition:user_custom_profile', 'tool_dynamic_cohorts');
+
+
+    // Create the fourth condition object
+    $condition4 = new stdClass();
+    $condition4->id = 0;
+    $condition4->sortorder = 3;
+    $condition4->classname = "tool_dynamic_cohorts\\local\\tool_dynamic_cohorts\\condition\\user_custom_profile";
+
+    // Config data for condition 2
+    $configdata4= new stdClass();
+    $configdata4->profilefield = "profile_field_membership_category_approved";
+    $configdata4->profile_field_membership_category_approved_operator = "3";
+    $configdata4->profile_field_membership_category_approved_value = "1";
+    $configdata4->include_missing_data = 0;
+    $condition4->configdata = json_encode($configdata4);
+
+     $condition4->description = get_string(
+        'condition:profile_field_description', 
+        'tool_dynamic_cohort', 
+        array(
+            'field' => 'Membership Category Approved',
+            'fieldoperator' => 'is equal to',
+            'fieldvalue' => 'Yes'
+        ));
+
+    $condition4->name = get_string('condition:user_custom_profile', 'tool_dynamic_cohorts');
+
+    // Create the fourth condition object
+    $condition5 = new stdClass();
+    $condition5->id = 0;
+    $condition5->sortorder = 3;
+    $condition5->classname = "tool_dynamic_cohorts\\local\\tool_dynamic_cohorts\\condition\\user_custom_profile";
+
+    // Config data for condition 2
+    $configdata5= new stdClass();
+    $configdata5->profilefield = "profile_field_hasactivesubscription";
+    $configdata5->profile_field_hasactivesubscription_operator = "3";
+    $configdata5->profile_field_hasactivesubscription_value = "1";
+    $configdata5->include_missing_data = 0;
+    $condition5->configdata = json_encode($configdata5);
+
+     $condition5->description = get_string(
+        'condition:profile_field_description', 
+        'tool_dynamic_cohort', 
+        array(
+            'field' => 'Has Active Subscription',
+            'fieldoperator' => 'is equal to',
+            'fieldvalue' => 'Yes'
+        ));
+
+    $condition5->name = get_string('condition:user_custom_profile', 'tool_dynamic_cohorts');
+
+    // Create an array of all conditions
+    $conditions = [$condition1, $condition2, $condition3, $condition4, $condition5];
+
+    // Convert to JSON
+    $json = json_encode($conditions, JSON_UNESCAPED_SLASHES);
+
+    return $json;
+}
+
+
 function auth_apoa_update_federation_statuses($setting) {
     global $DB; 
     
