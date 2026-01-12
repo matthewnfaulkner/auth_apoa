@@ -174,6 +174,7 @@ $string['hip'] = 'Hip';
 $string['infection'] = 'Infection Section';
 $string['knee'] = 'Knee';
 $string['research'] = 'Orthopaedic Research';
+$string['oncology'] = 'Musculo-Skeletal Oncology';
 $string['osteoporosis'] = 'Osteoporosis';
 $string['paediatrics'] = 'Paediatrics';
 $string['spine'] = 'Spine';
