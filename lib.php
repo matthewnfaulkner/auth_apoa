@@ -379,7 +379,43 @@ function send_accept_trigger(){
     
 }
 
-function process_subscriptions_form($formdata) {
+function process_subscriptions_form_1($formdata) {
+
+    global $USER;
+
+    if($formdata->alternative_membership) {
+        if($formdata->alternative_membership_option == 'federation'){
+            if($value = $formdata->alternative_membership_federation) {
+                $profile_field = array (
+                    'membership_category' => 'Federation Fellow',
+                    'federation' => $value,
+                    'membership_category_approved' => 0
+                );
+                profile_save_custom_fields($USER->id, $profile_field);
+                return false;
+            }
+        }
+        else if ($formdata->alternative_membership_option == 'associate') {
+            if($value = $formdata->alternative_membership_associate) {
+                $profile_field = array (
+                    'membership_category' => 'Associate Fellow',
+                    'association' => $value,
+                    'membership_category_approved' => 0
+                );
+                profile_save_custom_fields($USER->id, $profile_field);
+                return false;
+            }
+        }
+    }
+    else{
+        if($value = $formdata->chosen_subscription){
+            local_subscriptions_add_subscription_to_cart($value, $USER->id);
+            return true;
+        }
+    }
+}
+
+function process_subscriptions_form_2($formdata) {
 
     global $USER;
 
@@ -765,3 +801,4 @@ function auth_apoa_user_preferences(){
                 'permissioncallback' => [core_user::class, 'is_current_user'],
         ]];
 }
+

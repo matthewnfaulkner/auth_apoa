@@ -58,7 +58,7 @@ class auth_plugin_apoa extends auth_plugin_email {
                     'path' => 0,
                     'title' => get_string('pathnewtitle', 'auth_apoa'), 
                     'desc' => get_string('pathnewdesc', 'auth_apoa')),
-                'existing' => array(
+                /*'existing' => array(
                     'path' => 1, 
                     'title' => get_string('pathexistingtitle', 'auth_apoa'), 
                     'desc' => get_string('pathexistingdesc', 'auth_apoa'),
@@ -67,7 +67,7 @@ class auth_plugin_apoa extends auth_plugin_email {
                     'title' => get_string('pathfederationtitle', 'auth_apoa'), 
                     'desc' => get_string('pathfederationtitle', 'auth_apoa'),
                 )
-            ));
+            )*/);
     }
 
      /**
@@ -115,7 +115,7 @@ class auth_plugin_apoa extends auth_plugin_email {
      * @return bool Authentication success or failure.
      */
     public function user_login($username, $password) {
-        global $CFG, $DB;
+        global $CFG, $DB, $SESSION;
 
         // Validate the login by using the Moodle user table.
         // Remove if a different authentication method is desired.
@@ -123,6 +123,11 @@ class auth_plugin_apoa extends auth_plugin_email {
 
         // User does not exist.
         if (!$user) {
+            if(validate_email($username)){
+                if($user = $DB->get_record('auth_apoa', array('email' => $username))) {
+                    $SESSION->loginerrormsg = get_string('oldaccountexists', 'auth_apoa');
+                }
+            }
             return false;
         }
 
@@ -187,7 +192,7 @@ class auth_plugin_apoa extends auth_plugin_email {
 
         }
         else{
-            $confirmationurl = new moodle_url('/auth/apoa/confirm.php', array('data' => "$user->secret/$user->username", 'redirect' => $redirect));
+            $confirmationurl = new moodle_url('/auth/apoa/confirm.php', array('data' => "$user->secret/$user->username"));
         }
         
 
@@ -878,8 +883,9 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
     public function enrol_existing_member($user){
         global $DB;
         $toenrolin = [];
-        if($authrecord = $DB->get_record('auth_apoa', array('email' => $user->email, 'status' => 1))){
+        if($authrecord = $DB->get_record('auth_apoa', array('email' => $user->email))){
 
+           $active_main_subscription = true;
            $membershipcategory = $authrecord->membership_category;
            $lifemember = ($authrecord->lifemembership && $membershipcategory != "Federation Fellow" && $membershipcategory != 'Affiliate Fellow');
            
@@ -897,6 +903,9 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
            }
            else if ($subscriptionends > time()){
                 $toenrolin[$apoasubscription] = $subscriptionends;
+           }
+           else {
+                $active_main_subscription = false;
            }
            foreach($authrecord as $field => $value){
                 $subscription = get_config('auth_apoa', 'subscription' . $field);
@@ -934,9 +943,31 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
                 }
             }
 
-            return true;
+            return ['active_main_subscription' => $active_main_subscription, 'enrolledin' => implode(',', array_keys($toenrolin))];
         }
         
-        return false;
+        return [];
+    }
+
+    public function postlogout_hook($user)
+    {
+        $redirectTo = optional_param('redirectTo', '', PARAM_RAW);
+        if($redirectTo) {
+            redirect($redirectTo);
+        }
+        return parent::postlogout_hook($user);
+    }
+
+    public function pre_loginpage_hook() {
+         global $SESSION;
+        $requestparam = required_param('SAMLRequest', PARAM_RAW);
+        $relayState = optional_param('RelayState', '', PARAM_RAW);
+        if($relayState && $requestparam) {
+            $wantsurl = new moodle_url(
+                '/auth/saml2/idp/sso.php', 
+                array('RelayState' => $relayState, 'SAMLRequest' => $requestparam)
+                );
+            $SESSION->wantsurl = $wantsurl->out();
+        }
     }
 }

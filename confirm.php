@@ -89,16 +89,24 @@ if (!empty($data) || (!empty($p) && !empty($s))) {
             $manager->accept();
 
             // Check where to go, $redirect has a higher preference.
-            if (!empty($redirect)) {
-                if(!$existing) {
-
-                    $skipmain = $user->profile_field_membership_category == 'Federation Fellow' ? 1 : 0;
-                    $subscribeurl = new moodle_url('/auth/apoa/signup_subscriptions.php', array('skip' => $skipmain));
+            if(!$existing) {
+                $skipmain = $user->profile_field_membership_category == 'Federation Fellow' ? 1 : 0;
+                $subscribeurl = new moodle_url('/auth/apoa/signup_subscriptions.php', array('skip' => $skipmain));
+                redirect($subscribeurl);
+            } else {
+                if (!$existing['active_main_subscription']) {
+                    $subscribeurl = new moodle_url(
+                        '/auth/apoa/signup_subscriptions.php', 
+                        array(
+                            'expired' => true,
+                            'enrolledin' => $existing['enrolledin']
+                            ));
                     redirect($subscribeurl);
                 }
-                if (!empty($SESSION->wantsurl)) {
-                    unset($SESSION->wantsurl);
-                }
+            }
+            if (!empty($SESSION->wantsurl)) {
+                $redirect = $SESSION->wantsurl;
+                unset($SESSION->wantsurl);
                 redirect($redirect);
             }
         }

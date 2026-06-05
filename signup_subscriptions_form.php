@@ -42,30 +42,128 @@ class signup_subscriptions_form1 extends \moodleform {
 
 
     function definition() {
-        $mform = $this->_form;
+        global $DB;
 
+        $mform = $this->_form;
 
         $mainsubscriptionid = local_subscriptions_get_main_subscription();
         $enrolmentoptions = enrol_get_instances($mainsubscriptionid, true);
 
-        $radioarray=array();
+        $radioarray = array();
         foreach($enrolmentoptions as $option) {
             $plugin = enrol_get_plugin($option->enrol);
 
             if($plugin->show_enrolme_link($option)) {
-                $radioarray[] = $mform->createElement('radio', $mainsubscriptionid, '', get_string('subscriptionoptionlabel', 'auth_apoa', $option), $option->id);
+                $radioarray[] = $mform->createElement('radio', 
+                            'chosen_subscription', 
+                            '', 
+                            get_string('subscriptionoptionlabel', 'auth_apoa', $option), 
+                            $option->id,
+                            array('style' => 'width: 20px; height:20px'));
             }
+
+        }
+
+        $mform->addGroup($radioarray, 'radioarray_chosen_subscription' , '', array(' '), false);
+
+
+        $mform->addElement('header', 'header_alternative', get_string('alternative_membership_options', 'auth_apoa'));
+        $mform->setExpanded('header_alternative', false);
+
+        $mform->addElement('static', 'desc_alternative', get_string('alternative_membership_options_desc', 'auth_apoa'));
+        $mform->disabledIf('chosen_subscription', 'alternative_membership', 'checked');
+
+        $federationfield = $DB->get_record('user_info_field', array('shortname' => 'federation'));
+        $federations = explode("\n", $federationfield->param1);
+        $federationOptions = [0 => 'Select Federation'];
+        foreach($federations as $federation){
+            if(!$federation) {
+                continue;
+            }
+            $formattedsetting = strtolower(preg_replace('/[^A-Za-z]/', '', $federation));
+
+            if(get_config('auth_apoa', 'federationstatus' . $formattedsetting)) {
+                $federationOptions[$federation] = $federation;
+            }
+        }
+
+        $assocationfield = $DB->get_record('user_info_field', array('shortname' => 'association'));
+        $associations = explode("\n", $assocationfield->param1);
+        $associationOptions = [0 => 'Select Association'];
+        foreach($associations as $association){
+            if(!$association || $association == 'None') {
+                continue;
+            }
+            $associationOptions[$association] = $association;
             
         }
+
+        $mform->addElement('checkbox', 'alternative_membership', get_string('alternative_membership_options_enable', 'auth_apoa'));
         
-        $mform->addGroup($radioarray, 'radioarray_' . $mainsubscriptionid , '', array(' '), false);
-        $mform->addRule('radioarray_' . $mainsubscriptionid, '', 'required', null, 'client');
+
+        $federationElements = [];
+        $federationElements[]= $mform->createElement(
+            'select', 
+            'alternative_membership_option', 
+            get_string('alternative_membership_options_enable', 'auth_apoa'), 
+            [0 => 'Select Membership Type', 'federation' =>'Federation Member', 'associate' => 'Associate Member']
+        );
+        $federationElements[] = $mform->createElement(
+            'select', 
+            'alternative_membership_federation',
+             get_string('alternative_membership_options_desc', 'auth_apoa'), 
+             $federationOptions);
+        $federationElements[] = $mform->createElement(
+            'select', 'alternative_membership_associate', 
+            get_string('alternative_membership_options_desc', 'auth_apoa'), 
+            $associationOptions);
+        $mform->addGroup($federationElements, 'alternative_membership_elements' , '', array(' '), false);
+
+        $mform->hideIf('alternative_membership_elements', 'alternative_membership');
+
+        $mform->hideIf('alternative_membership_federation', 'alternative_membership_option', 'neq', 'federation');
+        
+        $mform->hideIf('alternative_membership_associate', 'alternative_membership_option', 'neq', 'associate');
+
         $this->set_display_vertical();
-        $this->add_action_buttons(true, get_string('continue'));
+
+        $buttonarray=array();
+        $buttonarray[] = $mform->createElement('submit', 'submitbutton', 'Continue');
+        $buttonarray[] = $mform->createElement('submit', 'skipbutton', 'Skip', null, null, ['customclassoverride' => 'btn-light']);
+        $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
+        $mform->closeHeaderBefore('buttonar');
 
     }
 
+    public function validation($data, $files)
+    {       
+        if($data['skipbutton']){
+            return;
+        }
+        $errors = parent::validation($data, $files);
 
+        if($data['alternative_membership']) {
+            if($data['alternative_membership_option'] == 'federation'){
+                if(!$data['alternative_membership_federation']) {
+                    $errors['alternative_membership_elements'] = get_string('federationnotselected', 'auth_apoa');
+                }
+            }
+            else if ($data['alternative_membership_option'] == 'associate') {
+                if(!$data['alternative_membership_associate']) {
+                    $errors['alternative_membership_elements'] = get_string('associationnotselected', 'auth_apoa');
+                }
+            }
+            else{
+                $errors['alternative_membership_elements'] = get_string('noaltmembershipselected', 'auth_apoa');
+            }
+        }
+        else {
+            if(!$data['chosen_subscription']) {
+                $errors['radioarray_chosen_subscription'] = get_string('nosubscriptionselected', 'auth_apoa');
+            }
+        }
+        return $errors;
+    }
 
 }
 
@@ -76,6 +174,9 @@ class signup_subscriptions_form2 extends \moodleform {
 
     function definition() {
         $mform = $this->_form;
+
+        $enrolledin = array_flip(explode(',', $this->_customdata['enrolledin']));
+
 
         $mainsubscriptionid = local_subscriptions_get_main_subscription();
 
@@ -89,22 +190,25 @@ class signup_subscriptions_form2 extends \moodleform {
                 $mform->setExpanded('header_' . $subscription->id);
 
                 $mform->addElement('static', 'desc_' . $subscription->id, format_text($subscription->summary, $subscription->summaryformat));
-                $mform->setExpanded('header_' . $subscription->id);
-
-                $enrolmentoptions = enrol_get_instances($subscription->id, true);
                 
-                $radioarray=array();
-                $radioarray[] = $mform->createElement('radio', $subscription->id, '', get_string('dontjoinsection', 'auth_apoa'), 0);
-                foreach($enrolmentoptions as $option) {
-                    
-                    $plugin = enrol_get_plugin($option->enrol);
-                    
-                    if($plugin->show_enrolme_link($option)) {
-                        $radioarray[] = $mform->createElement('radio', $subscription->id, '', get_string('subscriptionoptionlabel', 'auth_apoa', $option), $option->id);
-                    }
+                if(array_key_exists($subscription->id, $enrolledin)) {
+                    $mform->addElement('static', 'alreadysubbed_' . $subscription->id, get_string('alreadysubbed', 'auth_apoa'));
                 }
-                $mform->addGroup($radioarray, 'radioarray_' . $subscription->id , '', array(' '), false);
-                
+                else{
+                    $enrolmentoptions = enrol_get_instances($subscription->id, true);
+                    
+                    $radioarray=array();
+                    $radioarray[] = $mform->createElement('radio', $subscription->id, '', get_string('dontjoinsection', 'auth_apoa'), 0);
+                    foreach($enrolmentoptions as $option) {
+                        
+                        $plugin = enrol_get_plugin($option->enrol);
+                        
+                        if($plugin->show_enrolme_link($option)) {
+                            $radioarray[] = $mform->createElement('radio', $subscription->id, '', get_string('subscriptionoptionlabel', 'auth_apoa', $option), $option->id);
+                        }
+                    }
+                    $mform->addGroup($radioarray, 'radioarray_' . $subscription->id , '', array(' '), false);
+                }
             }
         };
 

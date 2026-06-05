@@ -30,10 +30,10 @@ defined('MOODLE_INTERNAL') || die();
 $string['pluginname'] = 'APOA Authentication';
 $string['auth_apoadescription'] = 'APOA authentication extends email authentication with support to authenticate pre-existing APOA users.';
 $string['auth_emailnofederationemail'] = 'No email address for this federaion';
-$string['pathnewtitle'] = 'New Member';
+$string['pathnewtitle'] = 'New Account';
 $string['passwordagain'] = 'Re-enter password';
 $string['pathexistingtitle'] = 'Exisiting Member';
-$string['pathnewdesc'] = 'Select if you have never had an APOA membership or are a member through your national federation';
+$string['pathnewdesc'] = 'Create a new account.';
 $string['pathexistingdesc'] = 'Select if you have an existing APOA membership.';
 $string['checkexistingemail'] = 'Check for exisiting membership';
 $string['emailexists'] = 'Email exists';
@@ -42,10 +42,12 @@ $string['exisitinguserheader'] = 'Sign Up Existing Member';
 $string['makenewaccount'] = "Make new account";
 $string['subscriptionmapping'] ='Subscription Mapping';
 $string['subscriptionmapping_desc'] ='Determines the mapping from subscription information contained within the existing user table with actual subscription courses.';
-
+$string['oldaccountexists'] = 'No APOA online account for this email, but we do have records of an APOA membership for this email. 
+To proceed, create a new account below using this email. Once created, your existing APOA membership will be imported into your new account.';
 $string['federationemailsheader'] = 'Federation Emails';
 $string['federationemails'] = 'Email addresses for each federation. This address is where federation confirms are sent after a user signs up as a federation member.';
-
+$string['alreadysubbed'] = 'You are already subscribed.';
+$string['subscriptionexpired'] = 'Your APOA subscription has expired. Choose from the options below to reactivate your membership.';
 
 $string['federationemailsent'] = "Your Federation has been notified of your registration.
 \nFor now you only have a temporary and limited access.
@@ -257,14 +259,14 @@ $string['auth_apoarecaptcha_key'] = "Recaptcha enabled";
 $string['auth_apoarecaptcha_key_desc'] = "Choose whter";
 
 $string['choosemaintitle'] = 'Choose your APOA subscription';
-$string['choosemaintitle_desc'] = "Thank you for signing up for APOAonline.com. <br> There's one final step before becoming a member of the APOA, you need to choose the length of your subscription. 
-<br>Choose your preferred subscription option below.";
+$string['choosemaintitle_desc'] = "<h4>Thank you for signing up for APOAonline.com.</h4> <br> <h5>There's one final step before becoming a member of the APOA, you need to choose a subscription.</h5> 
+<br><h5>Choose your preferred subscription from the options below.</h5>";
 
 $string['choosesectionstitle'] = 'Choose from the APOA sections';
 $string['choosesectionstitle_desc'] = "Members of the APOA can also join any of the APOA's 13 specialty sections. Below you can select which sections you wish to join.";
 
 $string['dontjoinsection'] = "I don't wish to join this section";
-$string['subscriptionoptionlabel'] = '{$a->name} <br> {$a->cost} {$a->currency}';
+$string['subscriptionoptionlabel'] = '<h4 class="px-5">{$a->name} <br> {$a->cost} {$a->currency}</h4>';
 $string['signup'] = 'Join the APOA';
 $string['forgottenpasswordemailexists'] = "We cannot reset your password, although we have a record of your membership, you are yet to create an account on APOAonline.com, please proceed below to create your account";
 $string['continuetoaccountcreation'] =  'Create my account';
@@ -312,3 +314,25 @@ $string['chaptercohortrules'] = '<p dir="ltr" style="text-align: left;">
       </li>
    </ul>
    </p>';
+
+$string['alternative_membership_options'] = '<b class="text-info">Other Membership Options</b>';
+$string['alternative_membership_options_desc'] = '<h5>Additional ways to join the APOA include </h5>
+   <ul class="py-3">
+      <li>
+         <b>Federation Membership</b> - If you are a member of a National Orthopaedic Association
+         that is a Federation member of APOA.
+      </li>
+      <li>
+         <b>Associate Membership</b> - If you are a member of a partner orgnanisation of APOA.
+      </li>
+   </ul>
+   If you select one of these options, your membership to the respective orgnaistaion will have to be confirmed before 
+   you are recognised as a member of APOA.';
+
+$string['alternative_membership_options_enable'] = 'Choose Other Membership Option.';
+
+$string['federationnotselected'] = 'Federation not selected.';
+$string['associationnotselected'] = 'Association not selected.';
+$string['noaltmembershipselected'] = 'No Alternative Membership Option Selected.';
+$string['nosubscriptionselected'] = 'No Membership Option Selected. If you don\'t want to subscribe right 
+this moment, you can choose skip below. You can always subscribe later if you wish. ';

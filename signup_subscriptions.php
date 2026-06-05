@@ -26,15 +26,33 @@
 require('../../config.php');
 require('signup_subscriptions_form.php');
 
+//skip first form
 $skip = optional_param('skip', '', PARAM_INT);
 
+//list of active subscriptions
+$enrolledin = optional_param('enrolledin', '', PARAM_TEXT);
+
+//main subscription expired.
+$expired = optional_param('expired', false, PARAM_BOOL);
 require_login(null, false);
 
+
+$returnurl = new moodle_url('/user/profile.php');
+
+if($SESSION->wantsurl) {
+    $returnurl = $SESSION->wantsurl;
+}
+
 if (empty($skip)) {
-    $mform1 = new signup_subscriptions_form1();
+    $mform1 = new signup_subscriptions_form1('', array('expired' => $expired));
 
     if ($formdata = $mform1->get_data()) {
-        process_subscriptions_form($formdata);
+        if($formdata->skipbutton){
+            redirect($returnurl);
+        }
+        if(!process_subscriptions_form_1($formdata)){
+            redirect($returnurl);
+        }
 
     } else {
 
@@ -47,6 +65,10 @@ if (empty($skip)) {
 
         echo $OUTPUT->header();
 
+        if ($expired) {
+            echo $OUTPUT->notification(get_string('subscriptionexpired', 'auth_apoa'), 'error');
+        } 
+        
         echo $OUTPUT->heading($choosemaintitle, 2, 'text-primary');
 
         echo \html_writer::tag('p', $choosemaindescription, array('class' => 'text-primary'));
@@ -59,17 +81,17 @@ if (empty($skip)) {
     }
 } 
 
-$returnurl = new moodle_url('/user/profile.php');
-$checkouturl = new moodle_url('/local/shopping_cart/checkout.php');
-$mform2 = new signup_subscriptions_form2();
 
-// If a file has been uploaded, then process it.
+$checkouturl = new moodle_url('/local/shopping_cart/checkout.php');
+$mform2 = new signup_subscriptions_form2('', array('enrolledin' => $enrolledin));
+
+
 if ($formdata = $mform2->is_cancelled()) {
     redirect($returnurl);
 
 } else if ($formdata = $mform2->get_data()) {
 
-    process_subscriptions_form($formdata);
+    process_subscriptions_form_2($formdata);
     redirect($checkouturl);
 
 }
