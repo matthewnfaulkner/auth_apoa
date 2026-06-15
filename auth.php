@@ -960,7 +960,7 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
 
     public function pre_loginpage_hook() {
          global $SESSION;
-        $requestparam = required_param('SAMLRequest', PARAM_RAW);
+        $requestparam = optional_param('SAMLRequest', '', PARAM_RAW);
         $relayState = optional_param('RelayState', '', PARAM_RAW);
         if($relayState && $requestparam) {
             $wantsurl = new moodle_url(
