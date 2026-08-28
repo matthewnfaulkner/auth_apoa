@@ -131,7 +131,8 @@ class signup_form extends \login_signup_form {
             }else{
                 $mform->setDefault('country', '');
             }
-
+            $mform->addRule('country', '', 'required');
+            
             profile_signup_fields($mform);
 
             $mform->addHelpButton('profile_field_membership_category', 'membership_category', 'auth_apoa', 'What is this?');
