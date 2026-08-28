@@ -94,6 +94,6 @@ echo  $OUTPUT->addblockbutton();
 echo $OUTPUT->custom_block_region('content');
 
 echo $OUTPUT->box_start('general col-12 col-lg-9 col-xl-9 m-auto');
-echo $OUTPUT->single_button(get_login_url(), 'Proceed to Sign Up');
+// echo $OUTPUT->single_button(get_login_url(), 'Proceed to Sign Up');
 echo $OUTPUT->box_end();
 echo $OUTPUT->footer();
