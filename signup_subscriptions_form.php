@@ -82,7 +82,7 @@ class signup_subscriptions_form1 extends \moodleform {
             }
             $formattedsetting = strtolower(preg_replace('/[^A-Za-z]/', '', $federation));
 
-            if(get_config('auth_apoa', 'federationstatus' . $formattedsetting)) {
+            if(!get_config('auth_apoa', 'federationstatus' . $formattedsetting)) {
                 $federationOptions[$federation] = $federation;
             }
         }
