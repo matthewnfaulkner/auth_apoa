@@ -111,7 +111,7 @@ function country_to_federation($country){
         'srilanka' => 'SriLanka',
         'taiwan' => 'Taiwan',
         'thailand' => 'Thailand',
-        'turkey' => 'Turkey',
+        'türkiye' => 'türkiye',
         'uae' => 'UAE',
         'vietnam' => 'Vietnam');
 
