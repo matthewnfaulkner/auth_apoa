@@ -118,6 +118,12 @@ if ($ADMIN->fulltree) {
         $setting->set_updatedcallback('auth_apoa_update_federation_statuses');          
         $page->add($setting);
 
+        $page->add(new admin_setting_configtext('auth_apoa/federationquota' . $formattedsetting,
+            $federation . "Membership Quota",
+            new lang_string('federationquota_desc', 'auth_apoa'),
+            '',
+            PARAM_INT));
+
         $page->add(new admin_setting_confightmleditor('auth_apoa/federationnotification' . $formattedsetting,
             $federation . " Notification",
             new lang_string('federationnotification_desc', 'auth_apoa'),
