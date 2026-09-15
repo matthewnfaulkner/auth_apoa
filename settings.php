@@ -119,7 +119,7 @@ if ($ADMIN->fulltree) {
         $page->add($setting);
 
         $page->add(new admin_setting_configtext('auth_apoa/federationquota' . $formattedsetting,
-            $federation . "Membership Quota",
+            $federation . " Membership Quota",
             new lang_string('federationquota_desc', 'auth_apoa'),
             '',
             PARAM_INT));
