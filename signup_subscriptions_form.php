@@ -51,28 +51,21 @@ class signup_subscriptions_form1 extends \moodleform {
         $profile = profile_user_record($USER->id, false);
         if(auth_apoa_can_choose_category_preference($profile->membership_category ?? '',
                 $profile->membership_category_approved ?? 0)) {
-            $mform->addElement('header', 'header_category_preference', get_string('categorypreferenceheader', 'auth_apoa'));
+            $mform->addElement('header', 'header_category_preference', get_string('categorypreference', 'auth_apoa'));
             $mform->setExpanded('header_category_preference', true);
-
-            $mform->addElement('static', 'desc_category_preference', '', get_string('categorypreference_desc', 'auth_apoa'));
-            $mform->hideIf('desc_category_preference', 'alternative_membership', 'checked');
 
             $categoryarray = array();
             foreach(PREFERABLE_MEMBERSHIP_CATEGORIES as $key => $category) {
-                $label = (object) array(
-                    'description' => get_string('categorypreference_' . $key, 'auth_apoa'),
-                    'category' => $category,
-                );
                 $categoryarray[] = $mform->createElement('radio',
                             'category_preference',
                             '',
-                            get_string('categorypreferenceoptionlabel', 'auth_apoa', $label),
+                            get_string('categorypreferenceoptionlabel', 'auth_apoa',
+                                get_string('categorypreference_' . $key, 'auth_apoa')),
                             $category,
                             array('style' => 'width: 20px; height:20px'));
             }
             $mform->addGroup($categoryarray, 'radioarray_category_preference',
                 get_string('categorypreference', 'auth_apoa'), array('<br>'), false);
-            $mform->addHelpButton('radioarray_category_preference', 'membership_category', 'auth_apoa');
             $mform->hideIf('radioarray_category_preference', 'alternative_membership', 'checked');
         }
 
