@@ -43,13 +43,14 @@ class signup_subscriptions_form1 extends \moodleform {
 
 
     function definition() {
-        global $DB;
+        global $DB, $USER;
 
         $mform = $this->_form;
 
-        $membershipfields = is_membership_category_approved();
-        if(auth_apoa_can_choose_category_preference($membershipfields['membership_category'] ?? '',
-                $membershipfields['membership_category_approved'] ?? 0)) {
+        // Read the profile directly, the membership_category_approved_cache can be stale.
+        $profile = profile_user_record($USER->id, false);
+        if(auth_apoa_can_choose_category_preference($profile->membership_category ?? '',
+                $profile->membership_category_approved ?? 0)) {
             $categoryarray = array();
             foreach(PREFERABLE_MEMBERSHIP_CATEGORIES as $key => $category) {
                 $categoryarray[] = $mform->createElement('radio',
