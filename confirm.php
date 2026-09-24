@@ -103,6 +103,10 @@ if (!empty($data) || (!empty($p) && !empty($s))) {
                             ));
                     redirect($subscribeurl);
                 }
+                //capture category preference without showing subscriptions.
+                if (auth_apoa_needs_category_preference($user->id)) {
+                    redirect(new moodle_url('/auth/apoa/signup_subscriptions.php', array('preferenceonly' => 1)));
+                }
             }
             if (!empty($SESSION->wantsurl)) {
                 $redirect = $SESSION->wantsurl;
