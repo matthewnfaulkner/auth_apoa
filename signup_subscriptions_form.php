@@ -33,6 +33,7 @@ require_once($CFG->dirroot . '/user/editlib.php');
 require_once($CFG->dirroot.'/login/lib.php');
 require_once($CFG->dirroot.'/login/signup_form.php');
 require_once($CFG->dirroot.'/local/subscriptions/lib.php');
+require_once($CFG->dirroot.'/auth/apoa/lib.php');
 
 use \core_user as core_user;
 use enrol_plugin;
@@ -45,6 +46,23 @@ class signup_subscriptions_form1 extends \moodleform {
         global $DB;
 
         $mform = $this->_form;
+
+        $membershipfields = is_membership_category_approved();
+        if(auth_apoa_can_choose_category_preference($membershipfields['membership_category'] ?? '',
+                $membershipfields['membership_category_approved'] ?? 0)) {
+            $categoryarray = array();
+            foreach(PREFERABLE_MEMBERSHIP_CATEGORIES as $key => $category) {
+                $categoryarray[] = $mform->createElement('radio',
+                            'category_preference',
+                            '',
+                            get_string('categorypreference_' . $key, 'auth_apoa'),
+                            $category);
+            }
+            $mform->addGroup($categoryarray, 'radioarray_category_preference',
+                get_string('categorypreference', 'auth_apoa'), array('<br>'), false);
+            $mform->addHelpButton('radioarray_category_preference', 'membership_category', 'auth_apoa');
+            $mform->hideIf('radioarray_category_preference', 'alternative_membership', 'checked');
+        }
 
         $mainsubscriptionid = local_subscriptions_get_main_subscription();
         $enrolmentoptions = enrol_get_instances($mainsubscriptionid, true);
@@ -160,6 +178,9 @@ class signup_subscriptions_form1 extends \moodleform {
         else {
             if(!$data['chosen_subscription']) {
                 $errors['radioarray_chosen_subscription'] = get_string('nosubscriptionselected', 'auth_apoa');
+            }
+            if($this->_form->elementExists('radioarray_category_preference') && empty($data['category_preference'])) {
+                $errors['radioarray_category_preference'] = get_string('nocategorypreferenceselected', 'auth_apoa');
             }
         }
         return $errors;
