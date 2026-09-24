@@ -323,7 +323,8 @@ $string['alternative_membership_options_desc'] = '<h5>Additional ways to join th
          that is a Federation member of APOA.
       </li>
       <li>
-         <b>Associate Membership</b> - If you are a member of a partner orgnanisation of APOA.
+         <b>Affiliate Federation Membership</b> - If you are a member of a National Orthopaedic Association
+         outside the Asia Pacific region that is an Affiliate Federation member of APOA.
       </li>
    </ul>
    If you select one of these options, your membership to the respective orgnaistaion will have to be confirmed before 
@@ -332,12 +333,17 @@ $string['alternative_membership_options_desc'] = '<h5>Additional ways to join th
 $string['alternative_membership_options_enable'] = 'Choose Other Membership Option.';
 
 $string['federationnotselected'] = 'Federation not selected.';
-$string['associationnotselected'] = 'Association not selected.';
+$string['associationnotselected'] = 'National Orthopaedic Association not selected.';
 $string['noaltmembershipselected'] = 'No Alternative Membership Option Selected.';
 $string['nosubscriptionselected'] = 'No Membership Option Selected. If you don\'t want to subscribe right 
 this moment, you can choose skip below. You can always subscribe later if you wish. ';
 
 $string['categorypreference'] = 'Which best describes you?';
+$string['categorypreferenceheader'] = '<b class="text-primary">Your membership category</b>';
+$string['categorypreference_desc'] = '<p class="text-muted">Your membership category depends on your profession.
+Choose the option that best describes you. It becomes your APOA membership category once your subscription is purchased.</p>';
+$string['categorypreferenceoptionlabel'] = '<span class="h5 px-3">{$a->description}</span> <span class="badge badge-secondary">{$a->category}</span>';
+$string['subscriptionheader'] = '<b class="text-primary">Your subscription</b>';
 $string['categorypreference_fellow'] = 'Practising orthopaedic surgeon';
 $string['categorypreference_seniorfellow'] = 'Orthopaedic surgeon retired from active practice';
 $string['categorypreference_associatefellow'] = 'Doctor of a medical specialty other than orthopaedics';

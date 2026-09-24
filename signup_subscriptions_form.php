@@ -51,19 +51,33 @@ class signup_subscriptions_form1 extends \moodleform {
         $profile = profile_user_record($USER->id, false);
         if(auth_apoa_can_choose_category_preference($profile->membership_category ?? '',
                 $profile->membership_category_approved ?? 0)) {
+            $mform->addElement('header', 'header_category_preference', get_string('categorypreferenceheader', 'auth_apoa'));
+            $mform->setExpanded('header_category_preference', true);
+
+            $mform->addElement('static', 'desc_category_preference', '', get_string('categorypreference_desc', 'auth_apoa'));
+            $mform->hideIf('desc_category_preference', 'alternative_membership', 'checked');
+
             $categoryarray = array();
             foreach(PREFERABLE_MEMBERSHIP_CATEGORIES as $key => $category) {
+                $label = (object) array(
+                    'description' => get_string('categorypreference_' . $key, 'auth_apoa'),
+                    'category' => $category,
+                );
                 $categoryarray[] = $mform->createElement('radio',
                             'category_preference',
                             '',
-                            get_string('categorypreference_' . $key, 'auth_apoa'),
-                            $category);
+                            get_string('categorypreferenceoptionlabel', 'auth_apoa', $label),
+                            $category,
+                            array('style' => 'width: 20px; height:20px'));
             }
             $mform->addGroup($categoryarray, 'radioarray_category_preference',
                 get_string('categorypreference', 'auth_apoa'), array('<br>'), false);
             $mform->addHelpButton('radioarray_category_preference', 'membership_category', 'auth_apoa');
             $mform->hideIf('radioarray_category_preference', 'alternative_membership', 'checked');
         }
+
+        $mform->addElement('header', 'header_subscription', get_string('subscriptionheader', 'auth_apoa'));
+        $mform->setExpanded('header_subscription', true);
 
         $mainsubscriptionid = local_subscriptions_get_main_subscription();
         $enrolmentoptions = enrol_get_instances($mainsubscriptionid, true);
@@ -108,7 +122,7 @@ class signup_subscriptions_form1 extends \moodleform {
 
         $assocationfield = $DB->get_record('user_info_field', array('shortname' => 'association'));
         $associations = explode("\n", $assocationfield->param1);
-        $associationOptions = [0 => 'Select Association'];
+        $associationOptions = [0 => 'Select National Orthopaedic Association'];
         foreach($associations as $association){
             if(!$association || $association == 'None') {
                 continue;
@@ -125,7 +139,7 @@ class signup_subscriptions_form1 extends \moodleform {
             'select', 
             'alternative_membership_option', 
             get_string('alternative_membership_options_enable', 'auth_apoa'), 
-            [0 => 'Select Membership Type', 'federation' =>'Federation Member', 'associate' => 'Associate Member']
+            [0 => 'Select Membership Type', 'federation' =>'Federation Member', 'affiliatefederation' => 'Affiliate Federation Member']
         );
         $federationElements[] = $mform->createElement(
             'select', 
@@ -142,7 +156,7 @@ class signup_subscriptions_form1 extends \moodleform {
 
         $mform->hideIf('alternative_membership_federation', 'alternative_membership_option', 'neq', 'federation');
         
-        $mform->hideIf('alternative_membership_associate', 'alternative_membership_option', 'neq', 'associate');
+        $mform->hideIf('alternative_membership_associate', 'alternative_membership_option', 'neq', 'affiliatefederation');
 
         $this->set_display_vertical();
 
@@ -167,7 +181,7 @@ class signup_subscriptions_form1 extends \moodleform {
                     $errors['alternative_membership_elements'] = get_string('federationnotselected', 'auth_apoa');
                 }
             }
-            else if ($data['alternative_membership_option'] == 'associate') {
+            else if ($data['alternative_membership_option'] == 'affiliatefederation') {
                 if(!$data['alternative_membership_associate']) {
                     $errors['alternative_membership_elements'] = get_string('associationnotselected', 'auth_apoa');
                 }
