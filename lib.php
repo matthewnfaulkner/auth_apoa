@@ -403,10 +403,10 @@ function process_subscriptions_form_1($formdata) {
                 return false;
             }
         }
-        else if ($formdata->alternative_membership_option == 'associate') {
+        else if ($formdata->alternative_membership_option == 'affiliatefederation') {
             if($value = $formdata->alternative_membership_associate) {
                 $profile_field = array (
-                    'membership_category' => 'Associate Fellow',
+                    'membership_category' => 'Affiliate Federation Fellow',
                     'association' => $value,
                     'membership_category_approved' => 0
                 );
