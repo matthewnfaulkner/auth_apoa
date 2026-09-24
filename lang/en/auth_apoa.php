@@ -336,3 +336,10 @@ $string['associationnotselected'] = 'Association not selected.';
 $string['noaltmembershipselected'] = 'No Alternative Membership Option Selected.';
 $string['nosubscriptionselected'] = 'No Membership Option Selected. If you don\'t want to subscribe right 
 this moment, you can choose skip below. You can always subscribe later if you wish. ';
+
+$string['categorypreference'] = 'Which best describes you?';
+$string['categorypreference_fellow'] = 'Practising orthopaedic surgeon';
+$string['categorypreference_seniorfellow'] = 'Orthopaedic surgeon retired from active practice';
+$string['categorypreference_associatefellow'] = 'Doctor of a medical specialty other than orthopaedics';
+$string['categorypreference_affiliatefellow'] = 'Paramedical professional or scientist';
+$string['nocategorypreferenceselected'] = 'Please choose which best describes you.';

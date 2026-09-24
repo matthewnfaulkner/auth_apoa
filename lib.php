@@ -34,6 +34,14 @@ define('MEMBERSHIP_AMENDED', 1);
 define('FEDERATION_ACTIVE', 0);
 define('FEDERATION_LAPSED', 1);
 define('FEDERATION_INACTIVE', 2);
+
+// Categories a user can choose as their preference when purchasing a subscription.
+define('PREFERABLE_MEMBERSHIP_CATEGORIES', array(
+    'fellow' => 'Fellow',
+    'seniorfellow' => 'Senior Fellow',
+    'associatefellow' => 'Associate Fellow',
+    'affiliatefellow' => 'Affiliate Fellow',
+));
 use core\event\notification_sent;
 use core_course\task\content_notification_task;
 use \core_message\api as api;
@@ -409,10 +417,61 @@ function process_subscriptions_form_1($formdata) {
     }
     else{
         if($value = $formdata->chosen_subscription){
+            if(!empty($formdata->category_preference)
+                    && in_array($formdata->category_preference, PREFERABLE_MEMBERSHIP_CATEGORIES)) {
+                set_user_preference('auth_apoa_category_preference', $formdata->category_preference);
+            }
             local_subscriptions_add_subscription_to_cart($value, $USER->id);
             return true;
         }
     }
+}
+
+/**
+ * Whether a user with the given membership category may choose a category preference.
+ * Approved categories, and Trainee, Honorary, Life and Federation categories, are never overwritten.
+ */
+function auth_apoa_can_choose_category_preference($membershipcategory, $approved) {
+    return empty($membershipcategory)
+        || $membershipcategory == 'no membership'
+        || (in_array($membershipcategory, PREFERABLE_MEMBERSHIP_CATEGORIES) && !$approved);
+}
+
+/**
+ * Applies the user's chosen category preference once they are enrolled in the main subscription.
+ */
+function auth_apoa_user_enrolment_changed($event){
+    global $CFG;
+    require_once($CFG->dirroot.'/local/subscriptions/lib.php');
+
+    if($event->courseid != local_subscriptions_get_main_subscription()) {
+        return;
+    }
+
+    $userid = $event->relateduserid;
+    if(!$preference = get_user_preferences('auth_apoa_category_preference', null, $userid)) {
+        return;
+    }
+
+    $user = core_user::get_user($userid);
+    profile_load_custom_fields($user);
+
+    if(auth_apoa_can_choose_category_preference($user->profile['membership_category'] ?? '',
+                $user->profile['membership_category_approved'] ?? 0)
+            && in_array($preference, PREFERABLE_MEMBERSHIP_CATEGORIES)) {
+        $user->profile_field_membership_category = $preference;
+        $user->profile_field_membership_category_approved = 0;
+        profile_save_data($user);
+
+        $user->profile['membership_category'] = $preference;
+        $authplugin = get_auth_plugin('apoa');
+        $authplugin->approve_membership_category($user);
+
+        $cache = \cache::make('auth_apoa', 'membership_category_approved_cache');
+        $cache->delete("u_$userid");
+    }
+
+    unset_user_preference('auth_apoa_category_preference', $userid);
 }
 
 function process_subscriptions_form_2($formdata) {
@@ -798,6 +857,12 @@ function auth_apoa_user_preferences(){
                 'type' =>   PARAM_INT,
                 'null' => NULL_ALLOWED,
                 'default' => 0,
+                'permissioncallback' => [core_user::class, 'is_current_user'],
+        ],
+        'auth_apoa_category_preference'=> [
+                'type' =>   PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null,
                 'permissioncallback' => [core_user::class, 'is_current_user'],
         ]];
 }
