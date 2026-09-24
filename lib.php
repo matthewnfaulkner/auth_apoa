@@ -438,7 +438,9 @@ function auth_apoa_can_choose_category_preference($membershipcategory, $approved
 }
 
 /**
- * Applies the user's chosen category preference once they are enrolled in the main subscription.
+ * Sets the user's membership category when they are enrolled in the main subscription.
+ * Their chosen preference is applied if their category can still change, otherwise users
+ * without a category default to Fellow. Any other existing category is left alone.
  */
 function auth_apoa_user_enrolment_changed($event){
     global $CFG;
@@ -448,22 +450,34 @@ function auth_apoa_user_enrolment_changed($event){
         return;
     }
 
-    $userid = $event->relateduserid;
-    if(!$preference = get_user_preferences('auth_apoa_category_preference', null, $userid)) {
+    if(($event->other['enrol'] ?? '') == 'cohort') {
         return;
     }
 
+    $userid = $event->relateduserid;
+    $preference = get_user_preferences('auth_apoa_category_preference', null, $userid);
+
     $user = core_user::get_user($userid);
     profile_load_custom_fields($user);
+    $currentcategory = $user->profile['membership_category'] ?? '';
 
-    if(auth_apoa_can_choose_category_preference($user->profile['membership_category'] ?? '',
-                $user->profile['membership_category_approved'] ?? 0)
-            && in_array($preference, PREFERABLE_MEMBERSHIP_CATEGORIES)) {
-        $user->profile_field_membership_category = $preference;
+    $newcategory = null;
+    if($preference && in_array($preference, PREFERABLE_MEMBERSHIP_CATEGORIES)
+            && auth_apoa_can_choose_category_preference($currentcategory,
+                $user->profile['membership_category_approved'] ?? 0)) {
+        $newcategory = $preference;
+    }
+    else if($event instanceof \core\event\user_enrolment_created
+            && (empty($currentcategory) || $currentcategory == 'no membership')) {
+        $newcategory = 'Fellow';
+    }
+
+    if($newcategory) {
+        $user->profile_field_membership_category = $newcategory;
         $user->profile_field_membership_category_approved = 0;
         profile_save_data($user);
 
-        $user->profile['membership_category'] = $preference;
+        $user->profile['membership_category'] = $newcategory;
         $authplugin = get_auth_plugin('apoa');
         $authplugin->approve_membership_category($user);
 
@@ -471,7 +485,9 @@ function auth_apoa_user_enrolment_changed($event){
         $cache->delete("u_$userid");
     }
 
-    unset_user_preference('auth_apoa_category_preference', $userid);
+    if($preference) {
+        unset_user_preference('auth_apoa_category_preference', $userid);
+    }
 }
 
 function process_subscriptions_form_2($formdata) {
