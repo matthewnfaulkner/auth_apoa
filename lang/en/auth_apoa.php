@@ -339,6 +339,7 @@ $string['nosubscriptionselected'] = 'No Membership Option Selected. If you don\'
 this moment, you can choose skip below. You can always subscribe later if you wish. ';
 
 $string['categorypreference'] = 'Which best describes you?';
+$string['categorypreference_desc'] = 'This is used to establish your APOA membership category.';
 $string['categorypreferenceoptionlabel'] = '<span class="h5 px-3">{$a}</span>';
 $string['subscriptionheader'] = '<b class="text-primary">Your subscription</b>';
 $string['categorypreference_fellow'] = 'Practising orthopaedic surgeon';

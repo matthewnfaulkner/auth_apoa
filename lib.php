@@ -417,10 +417,6 @@ function process_subscriptions_form_1($formdata) {
     }
     else{
         if($value = $formdata->chosen_subscription){
-            if(!empty($formdata->category_preference)
-                    && in_array($formdata->category_preference, PREFERABLE_MEMBERSHIP_CATEGORIES)) {
-                set_user_preference('auth_apoa_category_preference', $formdata->category_preference);
-            }
             local_subscriptions_add_subscription_to_cart($value, $USER->id);
             return true;
         }
@@ -428,13 +424,29 @@ function process_subscriptions_form_1($formdata) {
 }
 
 /**
- * Whether a user with the given membership category may choose a category preference.
- * Approved categories, and Trainee, Honorary, Life and Federation categories, are never overwritten.
+ * Whether a category preference can replace the given membership category when the user
+ * buys the main subscription. Federation members can, so their category is established if
+ * they become normal members. Trainee, Honorary, Life and approved categories are never overwritten.
  */
 function auth_apoa_can_choose_category_preference($membershipcategory, $approved) {
     return empty($membershipcategory)
         || $membershipcategory == 'no membership'
+        || $membershipcategory == 'Federation Fellow'
+        || $membershipcategory == 'Affiliate Federation Fellow'
         || (in_array($membershipcategory, PREFERABLE_MEMBERSHIP_CATEGORIES) && !$approved);
+}
+
+/**
+ * Whether the user should be asked for their category preference.
+ * Everyone is asked once, including approved and migrated members, so the answer is on record
+ * if their category ever needs establishing. Trainee, Honorary and Life Fellows are not asked.
+ */
+function auth_apoa_needs_category_preference($userid) {
+    if(get_user_preferences('auth_apoa_category_preference', null, $userid)) {
+        return false;
+    }
+    $profile = profile_user_record($userid, false);
+    return !in_array($profile->membership_category ?? '', array('Trainee Fellow', 'Honorary Fellow', 'Life Fellow'));
 }
 
 /**
@@ -483,10 +495,10 @@ function auth_apoa_user_enrolment_changed($event){
 
         $cache = \cache::make('auth_apoa', 'membership_category_approved_cache');
         $cache->delete("u_$userid");
-    }
 
-    if($preference) {
-        unset_user_preference('auth_apoa_category_preference', $userid);
+        if($preference) {
+            unset_user_preference('auth_apoa_category_preference', $userid);
+        }
     }
 }
 

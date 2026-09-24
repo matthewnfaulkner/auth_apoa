@@ -38,36 +38,47 @@ require_once($CFG->dirroot.'/auth/apoa/lib.php');
 use \core_user as core_user;
 use enrol_plugin;
 
+class signup_category_preference_form extends \moodleform {
+
+    function definition() {
+        $mform = $this->_form;
+
+        $categoryarray = array();
+        foreach(PREFERABLE_MEMBERSHIP_CATEGORIES as $key => $category) {
+            $categoryarray[] = $mform->createElement('radio',
+                        'category_preference',
+                        '',
+                        get_string('categorypreferenceoptionlabel', 'auth_apoa',
+                            get_string('categorypreference_' . $key, 'auth_apoa')),
+                        $category,
+                        array('style' => 'width: 20px; height:20px'));
+        }
+        $mform->addGroup($categoryarray, 'radioarray_category_preference', '', array('<br>'), false);
+
+        $this->set_display_vertical();
+
+        $mform->addElement('submit', 'submitbutton', get_string('continue'));
+    }
+
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+
+        if(empty($data['category_preference']) || !in_array($data['category_preference'], PREFERABLE_MEMBERSHIP_CATEGORIES)) {
+            $errors['radioarray_category_preference'] = get_string('nocategorypreferenceselected', 'auth_apoa');
+        }
+        return $errors;
+    }
+}
+
+
 class signup_subscriptions_form1 extends \moodleform {
 
 
 
     function definition() {
-        global $DB, $USER;
+        global $DB;
 
         $mform = $this->_form;
-
-        // Read the profile directly, the membership_category_approved_cache can be stale.
-        $profile = profile_user_record($USER->id, false);
-        if(auth_apoa_can_choose_category_preference($profile->membership_category ?? '',
-                $profile->membership_category_approved ?? 0)) {
-            $mform->addElement('header', 'header_category_preference', get_string('categorypreference', 'auth_apoa'));
-            $mform->setExpanded('header_category_preference', true);
-
-            $categoryarray = array();
-            foreach(PREFERABLE_MEMBERSHIP_CATEGORIES as $key => $category) {
-                $categoryarray[] = $mform->createElement('radio',
-                            'category_preference',
-                            '',
-                            get_string('categorypreferenceoptionlabel', 'auth_apoa',
-                                get_string('categorypreference_' . $key, 'auth_apoa')),
-                            $category,
-                            array('style' => 'width: 20px; height:20px'));
-            }
-            $mform->addGroup($categoryarray, 'radioarray_category_preference',
-                get_string('categorypreference', 'auth_apoa'), array('<br>'), false);
-            $mform->hideIf('radioarray_category_preference', 'alternative_membership', 'checked');
-        }
 
         $mform->addElement('header', 'header_subscription', get_string('subscriptionheader', 'auth_apoa'));
         $mform->setExpanded('header_subscription', true);
@@ -91,7 +102,6 @@ class signup_subscriptions_form1 extends \moodleform {
         }
 
         $mform->addGroup($radioarray, 'radioarray_chosen_subscription' , '', array(' '), false);
-
 
         $mform->addElement('header', 'header_alternative', get_string('alternative_membership_options', 'auth_apoa'));
         $mform->setExpanded('header_alternative', false);
@@ -186,9 +196,6 @@ class signup_subscriptions_form1 extends \moodleform {
         else {
             if(!$data['chosen_subscription']) {
                 $errors['radioarray_chosen_subscription'] = get_string('nosubscriptionselected', 'auth_apoa');
-            }
-            if($this->_form->elementExists('radioarray_category_preference') && empty($data['category_preference'])) {
-                $errors['radioarray_category_preference'] = get_string('nocategorypreferenceselected', 'auth_apoa');
             }
         }
         return $errors;

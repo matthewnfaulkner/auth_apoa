@@ -34,7 +34,14 @@ $enrolledin = optional_param('enrolledin', '', PARAM_TEXT);
 
 //main subscription expired.
 $expired = optional_param('expired', false, PARAM_BOOL);
+
+//only ask for category preference, skip subscriptions.
+$preferenceonly = optional_param('preferenceonly', false, PARAM_BOOL);
 require_login(null, false);
+
+$PAGE->set_url(new moodle_url('/auth/apoa/signup_subscriptions.php',
+    array_filter(array('skip' => $skip, 'enrolledin' => $enrolledin, 'expired' => $expired,
+        'preferenceonly' => $preferenceonly))));
 
 
 $returnurl = new moodle_url('/user/profile.php');
@@ -43,15 +50,52 @@ if($SESSION->wantsurl) {
     $returnurl = $SESSION->wantsurl;
 }
 
+/**
+ * Leave the subscription flow, clearing wantsurl now it has been used.
+ */
+function auth_apoa_leave_subscription_flow($returnurl) {
+    global $SESSION;
+    unset($SESSION->wantsurl);
+    redirect($returnurl);
+}
+
+// Ask for membership category preference before any subscription step, including for federation members.
+if (auth_apoa_needs_category_preference($USER->id)) {
+    $preferenceform = new signup_category_preference_form($PAGE->url);
+
+    if ($formdata = $preferenceform->get_data()) {
+        set_user_preference('auth_apoa_category_preference', $formdata->category_preference);
+        redirect($PAGE->url);
+    }
+
+    $categorypreferencetitle = get_string('categorypreference', 'auth_apoa');
+
+    $PAGE->set_title($categorypreferencetitle);
+    $PAGE->set_heading($SITE->fullname);
+
+    echo $OUTPUT->header();
+    echo $OUTPUT->heading($categorypreferencetitle, 2, 'text-primary');
+    echo \html_writer::tag('p', get_string('categorypreference_desc', 'auth_apoa'), array('class' => 'text-primary'));
+
+    $preferenceform->display();
+
+    echo $OUTPUT->footer();
+    die;
+}
+
+if ($preferenceonly) {
+    auth_apoa_leave_subscription_flow($returnurl);
+}
+
 if (empty($skip)) {
     $mform1 = new signup_subscriptions_form1('', array('expired' => $expired));
 
     if ($formdata = $mform1->get_data()) {
         if($formdata->skipbutton){
-            redirect($returnurl);
+            auth_apoa_leave_subscription_flow($returnurl);
         }
         if(!process_subscriptions_form_1($formdata)){
-            redirect($returnurl);
+            auth_apoa_leave_subscription_flow($returnurl);
         }
 
     } else {
@@ -87,7 +131,7 @@ $mform2 = new signup_subscriptions_form2('', array('enrolledin' => $enrolledin))
 
 
 if ($formdata = $mform2->is_cancelled()) {
-    redirect($returnurl);
+    auth_apoa_leave_subscription_flow($returnurl);
 
 } else if ($formdata = $mform2->get_data()) {
 
