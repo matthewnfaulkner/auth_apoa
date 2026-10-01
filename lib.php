@@ -400,6 +400,7 @@ function process_subscriptions_form_1($formdata) {
                     'membership_category_approved' => 0
                 );
                 profile_save_custom_fields($USER->id, $profile_field);
+                \auth_apoa\observer::clear_membership_expiration($USER->id);
                 return false;
             }
         }
@@ -411,6 +412,7 @@ function process_subscriptions_form_1($formdata) {
                     'membership_category_approved' => 0
                 );
                 profile_save_custom_fields($USER->id, $profile_field);
+                \auth_apoa\observer::clear_membership_expiration($USER->id);
                 return false;
             }
         }

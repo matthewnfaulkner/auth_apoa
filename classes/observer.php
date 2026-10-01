@@ -32,12 +32,14 @@ class observer {
      * When a user is enrolled in the main subscription, set their membership category and approve it.
      * Category is their answer to "Which best describes you?", their current choosable category, or Fellow.
      * Trainee, Honorary and Life Fellows keep theirs.
+     * Membership expiration date is set to the enrolment end date, or removed for Life Fellows
+     * and enrolments without an end date.
      *
      * @param \core\event\base $event user_enrolment_created or user_enrolment_updated
      * @return void
      */
     public static function user_enrolment_changed(\core\event\base $event) {
-        global $CFG;
+        global $CFG, $DB;
         require_once($CFG->dirroot . '/user/profile/lib.php');
 
         if ($event->courseid != get_config('local_subscriptions', 'mainsubscription') || $event->other['enrol'] == 'cohort') {
@@ -59,6 +61,28 @@ class observer {
             'membership_category_approved' => 1,
         ]);
 
+        $timeend = $DB->get_field('user_enrolments', 'timeend', ['id' => $event->objectid]);
+        if ($timeend && $category != 'Life Fellow') {
+            profile_save_custom_fields($userid, ['membership_expires' => $timeend]);
+        } else {
+            self::clear_membership_expiration($userid);
+        }
+
         \cache::make('auth_apoa', 'membership_category_approved_cache')->delete("u_$userid");
+    }
+
+    /**
+     * Remove a user's membership expiration date, for members whose membership does not expire
+     * (Life, Federation and Affiliate Federation members, and enrolments without an end date).
+     *
+     * @param int $userid
+     * @return void
+     */
+    public static function clear_membership_expiration(int $userid) {
+        global $DB;
+
+        if ($fieldid = $DB->get_field('user_info_field', 'id', ['shortname' => 'membership_expires'])) {
+            $DB->delete_records('user_info_data', ['userid' => $userid, 'fieldid' => $fieldid]);
+        }
     }
 }
