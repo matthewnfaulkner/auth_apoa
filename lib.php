@@ -425,15 +425,15 @@ function process_subscriptions_form_1($formdata) {
 
 /**
  * Whether a category preference can replace the given membership category when the user
- * buys the main subscription. Federation members can, so their category is established if
- * they become normal members. Trainee, Honorary, Life and approved categories are never overwritten.
+ * buys the main subscription, whether or not it is approved. Federation members can, so their
+ * category is established if they become normal members. Trainee, Honorary and Life are never overwritten.
  */
-function auth_apoa_can_choose_category_preference($membershipcategory, $approved) {
+function auth_apoa_can_choose_category_preference($membershipcategory) {
     return empty($membershipcategory)
         || $membershipcategory == 'no membership'
         || $membershipcategory == 'Federation Fellow'
         || $membershipcategory == 'Affiliate Federation Fellow'
-        || (in_array($membershipcategory, PREFERABLE_MEMBERSHIP_CATEGORIES) && !$approved);
+        || in_array($membershipcategory, PREFERABLE_MEMBERSHIP_CATEGORIES);
 }
 
 /**
@@ -475,8 +475,7 @@ function auth_apoa_user_enrolment_changed($event){
 
     $newcategory = null;
     if($preference && in_array($preference, PREFERABLE_MEMBERSHIP_CATEGORIES)
-            && auth_apoa_can_choose_category_preference($currentcategory,
-                $user->profile['membership_category_approved'] ?? 0)) {
+            && auth_apoa_can_choose_category_preference($currentcategory)) {
         $newcategory = $preference;
     }
     else if($event instanceof \core\event\user_enrolment_created
@@ -484,26 +483,26 @@ function auth_apoa_user_enrolment_changed($event){
         $newcategory = 'Fellow';
     }
 
+    // Subscribing is the approval, so a new main subscription enrolment approves the resulting category.
+    $subscribed = $event instanceof \core\event\user_enrolment_created;
+
+    if(!$newcategory && !$subscribed) {
+        debugging("auth_apoa: membership category not changed for user $userid " .
+            "(category '$currentcategory', preference '" . ($preference ?? '') . "')", DEBUG_DEVELOPER);
+        return;
+    }
+
     if($newcategory) {
         $user->profile_field_membership_category = $newcategory;
-        $user->profile_field_membership_category_approved = 0;
-        profile_save_data($user);
-
-        $user->profile['membership_category'] = $newcategory;
-        $authplugin = get_auth_plugin('apoa');
-        $authplugin->approve_membership_category($user);
-
-        $cache = \cache::make('auth_apoa', 'membership_category_approved_cache');
-        $cache->delete("u_$userid");
-
-        if($preference) {
-            unset_user_preference('auth_apoa_category_preference', $userid);
-        }
     }
-    else {
-        debugging("auth_apoa: membership category not changed for user $userid " .
-            "(category '$currentcategory', approved " . ($user->profile['membership_category_approved'] ?? 0) .
-            ", preference '" . ($preference ?? '') . "')", DEBUG_DEVELOPER);
+    $user->profile_field_membership_category_approved = 1;
+    profile_save_data($user);
+
+    $cache = \cache::make('auth_apoa', 'membership_category_approved_cache');
+    $cache->delete("u_$userid");
+
+    if($newcategory && $preference) {
+        unset_user_preference('auth_apoa_category_preference', $userid);
     }
 }
 
