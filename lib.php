@@ -424,19 +424,6 @@ function process_subscriptions_form_1($formdata) {
 }
 
 /**
- * Whether a category preference can replace the given membership category when the user
- * buys the main subscription, whether or not it is approved. Federation members can, so their
- * category is established if they become normal members. Trainee, Honorary and Life are never overwritten.
- */
-function auth_apoa_can_choose_category_preference($membershipcategory) {
-    return empty($membershipcategory)
-        || $membershipcategory == 'no membership'
-        || $membershipcategory == 'Federation Fellow'
-        || $membershipcategory == 'Affiliate Federation Fellow'
-        || in_array($membershipcategory, PREFERABLE_MEMBERSHIP_CATEGORIES);
-}
-
-/**
  * Whether the user should be asked for their category preference.
  * Everyone is asked once, including approved and migrated members, so the answer is on record
  * if their category ever needs establishing. Trainee, Honorary and Life Fellows are not asked.
@@ -455,51 +442,30 @@ function auth_apoa_needs_category_preference($userid) {
  * without a category default to Fellow. Any other existing category is left alone.
  */
 function auth_apoa_user_enrolment_changed($event){
-    global $CFG, $DB;
+    global $CFG;
     require_once($CFG->dirroot.'/local/subscriptions/lib.php');
 
-    if($event->courseid != local_subscriptions_get_main_subscription()) {
-        return;
-    }
-
-    if(($event->other['enrol'] ?? '') == 'cohort') {
-        return;
-    }
-
-    // Only act on active enrolments, created or updated (e.g. re-enrolled, renewed, reactivated).
-    $ue = $DB->get_record('user_enrolments', array('id' => $event->objectid));
-    if(!$ue || $ue->status != ENROL_USER_ACTIVE) {
+    if($event->courseid != local_subscriptions_get_main_subscription() || $event->other['enrol'] == 'cohort') {
         return;
     }
 
     $userid = $event->relateduserid;
-    $preference = get_user_preferences('auth_apoa_category_preference', null, $userid);
     $currentcategory = profile_user_record($userid, false)->membership_category ?? '';
 
-    if($preference && in_array($preference, PREFERABLE_MEMBERSHIP_CATEGORIES)
-            && auth_apoa_can_choose_category_preference($currentcategory)) {
-        $newcategory = $preference;
-    }
-    // Subscribing makes users without a category, and federation members, regular Fellows.
-    else if(in_array($currentcategory, array('', 'no membership', 'Federation Fellow', 'Affiliate Federation Fellow'))) {
-        $newcategory = 'Fellow';
-    }
-    else {
-        $newcategory = $currentcategory;
+    // Subscribing makes you a regular member, approved, in your chosen category or Fellow.
+    if(in_array($currentcategory, array('Trainee Fellow', 'Honorary Fellow', 'Life Fellow'))) {
+        $category = $currentcategory;
+    } else {
+        $default = in_array($currentcategory, PREFERABLE_MEMBERSHIP_CATEGORIES) ? $currentcategory : 'Fellow';
+        $category = get_user_preferences('auth_apoa_category_preference', $default, $userid);
     }
 
-    // Subscribing is the approval. Only federation members who have not subscribed are approved through their federation.
     profile_save_custom_fields($userid, array(
-        'membership_category' => $newcategory,
+        'membership_category' => $category,
         'membership_category_approved' => 1,
     ));
 
-    $cache = \cache::make('auth_apoa', 'membership_category_approved_cache');
-    $cache->delete("u_$userid");
-
-    if($preference && $newcategory == $preference) {
-        unset_user_preference('auth_apoa_category_preference', $userid);
-    }
+    \cache::make('auth_apoa', 'membership_category_approved_cache')->delete("u_$userid");
 }
 
 function process_subscriptions_form_2($formdata) {
