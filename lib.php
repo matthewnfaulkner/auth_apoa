@@ -436,38 +436,6 @@ function auth_apoa_needs_category_preference($userid) {
     return !in_array($profile->membership_category ?? '', array('Trainee Fellow', 'Honorary Fellow', 'Life Fellow'));
 }
 
-/**
- * Sets the user's membership category when they are enrolled in the main subscription.
- * Their chosen preference is applied if their category can still change, otherwise users
- * without a category default to Fellow. Any other existing category is left alone.
- */
-function auth_apoa_user_enrolment_changed($event){
-    global $CFG;
-    require_once($CFG->dirroot.'/local/subscriptions/lib.php');
-
-    if($event->courseid != local_subscriptions_get_main_subscription() || $event->other['enrol'] == 'cohort') {
-        return;
-    }
-
-    $userid = $event->relateduserid;
-    $currentcategory = profile_user_record($userid, false)->membership_category ?? '';
-
-    // Subscribing makes you a regular member, approved, in your chosen category or Fellow.
-    if(in_array($currentcategory, array('Trainee Fellow', 'Honorary Fellow', 'Life Fellow'))) {
-        $category = $currentcategory;
-    } else {
-        $default = in_array($currentcategory, PREFERABLE_MEMBERSHIP_CATEGORIES) ? $currentcategory : 'Fellow';
-        $category = get_user_preferences('auth_apoa_category_preference', $default, $userid);
-    }
-
-    profile_save_custom_fields($userid, array(
-        'membership_category' => $category,
-        'membership_category_approved' => 1,
-    ));
-
-    \cache::make('auth_apoa', 'membership_category_approved_cache')->delete("u_$userid");
-}
-
 function process_subscriptions_form_2($formdata) {
 
     global $USER;

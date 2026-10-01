@@ -29,15 +29,36 @@ defined('MOODLE_INTERNAL') || die();
 class observer {
 
     /**
-     * Set membership category when a user is enrolled in, or their enrolment changes in, the main subscription.
+     * When a user is enrolled in the main subscription, set their membership category and approve it.
+     * Category is their answer to "Which best describes you?", their current choosable category, or Fellow.
+     * Trainee, Honorary and Life Fellows keep theirs.
      *
      * @param \core\event\base $event user_enrolment_created or user_enrolment_updated
      * @return void
      */
     public static function user_enrolment_changed(\core\event\base $event) {
         global $CFG;
-        require_once($CFG->dirroot . '/auth/apoa/lib.php');
+        require_once($CFG->dirroot . '/user/profile/lib.php');
 
-        auth_apoa_user_enrolment_changed($event);
+        if ($event->courseid != get_config('local_subscriptions', 'mainsubscription') || $event->other['enrol'] == 'cohort') {
+            return;
+        }
+
+        $userid = $event->relateduserid;
+        $current = profile_user_record($userid, false)->membership_category ?? '';
+
+        if (in_array($current, ['Trainee Fellow', 'Honorary Fellow', 'Life Fellow'])) {
+            $category = $current;
+        } else {
+            $default = in_array($current, ['Fellow', 'Senior Fellow', 'Associate Fellow', 'Affiliate Fellow']) ? $current : 'Fellow';
+            $category = get_user_preferences('auth_apoa_category_preference', $default, $userid);
+        }
+
+        profile_save_custom_fields($userid, [
+            'membership_category' => $category,
+            'membership_category_approved' => 1,
+        ]);
+
+        \cache::make('auth_apoa', 'membership_category_approved_cache')->delete("u_$userid");
     }
 }
