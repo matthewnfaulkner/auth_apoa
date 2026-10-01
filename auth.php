@@ -891,7 +891,7 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
            
            if($user->profile_field_membership_category == null || $user->profile_field_membership_category == 'no membership') {
                 $user->profile_field_membership_category = $membershipcategory;
-                if($membershipcategory != 'Federation Fellow' && $membershipcategory != 'Affiliate Fellow'){
+                if($membershipcategory != 'Federation Fellow' && $membershipcategory != 'Affiliate Federation Fellow'){
                     $user->profile_field_federation = $authrecord->country;
                 }
            }
