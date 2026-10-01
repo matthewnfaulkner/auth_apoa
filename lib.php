@@ -455,7 +455,7 @@ function auth_apoa_needs_category_preference($userid) {
  * without a category default to Fellow. Any other existing category is left alone.
  */
 function auth_apoa_user_enrolment_changed($event){
-    global $CFG;
+    global $CFG, $DB;
     require_once($CFG->dirroot.'/local/subscriptions/lib.php');
 
     if($event->courseid != local_subscriptions_get_main_subscription()) {
@@ -466,44 +466,38 @@ function auth_apoa_user_enrolment_changed($event){
         return;
     }
 
+    // Only act on active enrolments, created or updated (e.g. re-enrolled, renewed, reactivated).
+    $ue = $DB->get_record('user_enrolments', array('id' => $event->objectid));
+    if(!$ue || $ue->status != ENROL_USER_ACTIVE) {
+        return;
+    }
+
     $userid = $event->relateduserid;
     $preference = get_user_preferences('auth_apoa_category_preference', null, $userid);
+    $currentcategory = profile_user_record($userid, false)->membership_category ?? '';
 
-    $user = core_user::get_user($userid);
-    profile_load_custom_fields($user);
-    $currentcategory = $user->profile['membership_category'] ?? '';
-
-    $newcategory = null;
     if($preference && in_array($preference, PREFERABLE_MEMBERSHIP_CATEGORIES)
             && auth_apoa_can_choose_category_preference($currentcategory)) {
         $newcategory = $preference;
     }
     // Subscribing makes users without a category, and federation members, regular Fellows.
-    else if($event instanceof \core\event\user_enrolment_created
-            && in_array($currentcategory, array('', 'no membership', 'Federation Fellow', 'Affiliate Federation Fellow'))) {
+    else if(in_array($currentcategory, array('', 'no membership', 'Federation Fellow', 'Affiliate Federation Fellow'))) {
         $newcategory = 'Fellow';
     }
-
-    // Subscribing is the approval, so a new main subscription enrolment approves the resulting category.
-    // Only federation members who have not subscribed are approved through their federation.
-    $approve = $newcategory || $event instanceof \core\event\user_enrolment_created;
-
-    if(!$approve) {
-        debugging("auth_apoa: membership category not changed for user $userid " .
-            "(category '$currentcategory', preference '" . ($preference ?? '') . "')", DEBUG_DEVELOPER);
-        return;
+    else {
+        $newcategory = $currentcategory;
     }
 
-    if($newcategory) {
-        $user->profile_field_membership_category = $newcategory;
-    }
-    $user->profile_field_membership_category_approved = 1;
-    profile_save_data($user);
+    // Subscribing is the approval. Only federation members who have not subscribed are approved through their federation.
+    profile_save_custom_fields($userid, array(
+        'membership_category' => $newcategory,
+        'membership_category_approved' => 1,
+    ));
 
     $cache = \cache::make('auth_apoa', 'membership_category_approved_cache');
     $cache->delete("u_$userid");
 
-    if($newcategory && $preference) {
+    if($preference && $newcategory == $preference) {
         unset_user_preference('auth_apoa_category_preference', $userid);
     }
 }
