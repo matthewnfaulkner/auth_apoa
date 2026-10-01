@@ -37,28 +37,49 @@ class observer {
      * @return void
      */
     public static function user_enrolment_changed(\core\event\base $event) {
-        global $CFG;
-        require_once($CFG->dirroot . '/user/profile/lib.php');
+        global $CFG, $DB;
 
-        if ($event->courseid != get_config('local_subscriptions', 'mainsubscription') || $event->other['enrol'] == 'cohort') {
-            return;
+        // TEMPORARY: report what happened as an on-screen notification, remove once working.
+        try {
+            require_once($CFG->dirroot . '/user/profile/lib.php');
+
+            $mainsubscription = get_config('local_subscriptions', 'mainsubscription');
+            $enrol = $event->other['enrol'] ?? '';
+            if ($event->courseid != $mainsubscription || $enrol == 'cohort') {
+                \core\notification::info("auth_apoa: skipped: course {$event->courseid}, enrol '$enrol', " .
+                    "main subscription setting '$mainsubscription'");
+                return;
+            }
+
+            $userid = $event->relateduserid;
+            $current = profile_user_record($userid, false)->membership_category ?? '';
+
+            if (in_array($current, ['Trainee Fellow', 'Honorary Fellow', 'Life Fellow'])) {
+                $category = $current;
+            } else {
+                $default = in_array($current, ['Fellow', 'Senior Fellow', 'Associate Fellow', 'Affiliate Fellow']) ? $current : 'Fellow';
+                $category = get_user_preferences('auth_apoa_category_preference', $default, $userid);
+            }
+
+            profile_save_custom_fields($userid, [
+                'membership_category' => $category,
+                'membership_category_approved' => 1,
+            ]);
+
+            \cache::make('auth_apoa', 'membership_category_approved_cache')->delete("u_$userid");
+
+            // Read back from the database to confirm the write.
+            $saved = $DB->get_field_sql("SELECT d.data FROM {user_info_data} d
+                    JOIN {user_info_field} f ON f.id = d.fieldid
+                    WHERE f.shortname = :shortname AND d.userid = :userid",
+                ['shortname' => 'membership_category', 'userid' => $userid]);
+
+            \core\notification::success("auth_apoa: user $userid category was '$current', set to '$category', " .
+                "database now has '$saved'");
+
+        } catch (\Throwable $e) {
+            \core\notification::error("auth_apoa error: " . get_class($e) . ": " . $e->getMessage() .
+                " (" . $e->getFile() . ":" . $e->getLine() . ")");
         }
-
-        $userid = $event->relateduserid;
-        $current = profile_user_record($userid, false)->membership_category ?? '';
-
-        if (in_array($current, ['Trainee Fellow', 'Honorary Fellow', 'Life Fellow'])) {
-            $category = $current;
-        } else {
-            $default = in_array($current, ['Fellow', 'Senior Fellow', 'Associate Fellow', 'Affiliate Fellow']) ? $current : 'Fellow';
-            $category = get_user_preferences('auth_apoa_category_preference', $default, $userid);
-        }
-
-        profile_save_custom_fields($userid, [
-            'membership_category' => $category,
-            'membership_category_approved' => 1,
-        ]);
-
-        \cache::make('auth_apoa', 'membership_category_approved_cache')->delete("u_$userid");
     }
 }
