@@ -445,9 +445,7 @@ function auth_apoa_user_enrolment_changed($event){
     global $CFG;
     require_once($CFG->dirroot.'/local/subscriptions/lib.php');
 
-    // The APOA subscription course is configured in both local_subscriptions and auth_apoa, accept either.
-    $maincourses = array(local_subscriptions_get_main_subscription(), get_config('auth_apoa', 'subscriptionapoa'));
-    if(!in_array($event->courseid, $maincourses) || $event->other['enrol'] == 'cohort') {
+    if($event->courseid != local_subscriptions_get_main_subscription() || $event->other['enrol'] == 'cohort') {
         return;
     }
 
