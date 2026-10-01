@@ -500,6 +500,11 @@ function auth_apoa_user_enrolment_changed($event){
             unset_user_preference('auth_apoa_category_preference', $userid);
         }
     }
+    else {
+        debugging("auth_apoa: membership category not changed for user $userid " .
+            "(category '$currentcategory', approved " . ($user->profile['membership_category_approved'] ?? 0) .
+            ", preference '" . ($preference ?? '') . "')", DEBUG_DEVELOPER);
+    }
 }
 
 function process_subscriptions_form_2($formdata) {
