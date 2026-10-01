@@ -887,7 +887,7 @@ function email_to_federation($user, $to,  $from, $subject, $messagetext, $messag
 
            $active_main_subscription = true;
            $membershipcategory = $authrecord->membership_category;
-           $lifemember = ($authrecord->lifemembership && $membershipcategory != "Federation Fellow" && $membershipcategory != 'Affiliate Fellow');
+           $lifemember = ($authrecord->lifemembership && $membershipcategory != "Federation Fellow" && $membershipcategory != 'Affiliate Federation Fellow');
            
            if($user->profile_field_membership_category == null || $user->profile_field_membership_category == 'no membership') {
                 $user->profile_field_membership_category = $membershipcategory;
