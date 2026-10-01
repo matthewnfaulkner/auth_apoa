@@ -478,15 +478,17 @@ function auth_apoa_user_enrolment_changed($event){
             && auth_apoa_can_choose_category_preference($currentcategory)) {
         $newcategory = $preference;
     }
+    // Subscribing makes users without a category, and federation members, regular Fellows.
     else if($event instanceof \core\event\user_enrolment_created
-            && (empty($currentcategory) || $currentcategory == 'no membership')) {
+            && in_array($currentcategory, array('', 'no membership', 'Federation Fellow', 'Affiliate Federation Fellow'))) {
         $newcategory = 'Fellow';
     }
 
     // Subscribing is the approval, so a new main subscription enrolment approves the resulting category.
-    $subscribed = $event instanceof \core\event\user_enrolment_created;
+    // Only federation members who have not subscribed are approved through their federation.
+    $approve = $newcategory || $event instanceof \core\event\user_enrolment_created;
 
-    if(!$newcategory && !$subscribed) {
+    if(!$approve) {
         debugging("auth_apoa: membership category not changed for user $userid " .
             "(category '$currentcategory', preference '" . ($preference ?? '') . "')", DEBUG_DEVELOPER);
         return;
