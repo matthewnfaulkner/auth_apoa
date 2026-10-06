@@ -80,5 +80,28 @@
         <INDEX NAME="email" UNIQUE="true" FIELDS="email"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="auth_apoa_payments" COMMENT="Payments made on the old APOA site. The member is linked by email to auth_apoa (and user), so their name, address etc. are not stored here.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="email" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Email of the member, as in auth_apoa.email"/>
+        <FIELD NAME="transactionid" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Transaction id from the old site, unique"/>
+        <FIELD NAME="membershiptype" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Membership type paid for, e.g. Life Fellow"/>
+        <FIELD NAME="duration" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Membership duration paid for, e.g. Life"/>
+        <FIELD NAME="paymentfor" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="What the payment was for, e.g. New Registration"/>
+        <FIELD NAME="subspecialties" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Sections selected with the payment, comma separated"/>
+        <FIELD NAME="amount" TYPE="number" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="2" COMMENT="Total paid"/>
+        <FIELD NAME="currency" TYPE="char" LENGTH="3" NOTNULL="true" DEFAULT="USD" SEQUENCE="false"/>
+        <FIELD NAME="paymentdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Time of the payment on the old site"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="User who uploaded the payment"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="transactionid" UNIQUE="true" FIELDS="transactionid"/>
+        <INDEX NAME="email" UNIQUE="false" FIELDS="email"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

@@ -527,6 +527,41 @@ function xmldb_auth_apoa_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023062340, 'auth', 'apoa');
     }
 
+    if ($oldversion < 2023062346) {
+
+        // Define table auth_apoa_payments to be created.
+        $table = new xmldb_table('auth_apoa_payments');
+
+        // Adding fields to table auth_apoa_payments.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('email', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('transactionid', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('membershiptype', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+        $table->add_field('duration', XMLDB_TYPE_CHAR, '100', null, null, null, null);
+        $table->add_field('paymentfor', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+        $table->add_field('subspecialties', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('amount', XMLDB_TYPE_NUMBER, '10, 2', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('currency', XMLDB_TYPE_CHAR, '3', null, XMLDB_NOTNULL, null, 'USD');
+        $table->add_field('paymentdate', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        // Adding keys to table auth_apoa_payments.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Adding indexes to table auth_apoa_payments.
+        $table->add_index('transactionid', XMLDB_INDEX_UNIQUE, ['transactionid']);
+        $table->add_index('email', XMLDB_INDEX_NOTUNIQUE, ['email']);
+
+        // Conditionally launch create table for auth_apoa_payments.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Apoa savepoint reached.
+        upgrade_plugin_savepoint(true, 2023062346, 'auth', 'apoa');
+    }
+
 
     return true;
 }
