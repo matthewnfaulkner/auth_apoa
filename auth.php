@@ -178,8 +178,9 @@ class auth_plugin_apoa extends auth_plugin_email {
         
         // Save wantsurl against user's profile, so we can return them there upon confirmation.
         if (!empty($SESSION->wantsurl)) {
+            // Send users who signed up from the site home to their dashboard once confirmed.
             if($SESSION->wantsurl == $CFG->wwwroot . '/'){
-                $redirect =  new moodle_url('/local/landingpage/index.php');
+                $SESSION->wantsurl = (new moodle_url('/my/'))->out(false);
             }
             set_user_preference('auth_email_wantsurl', $SESSION->wantsurl, $user);
         }
@@ -332,7 +333,7 @@ function send_federation_confirm_to_user($user) {
 
     $subject = get_string('emailconfirmationfederationtousersubject', 'auth_apoa', format_string($site->fullname));
 
-    $confirmationurl = new moodle_url('/local/landingpage/index.php');
+    $confirmationurl = new moodle_url('/my/');
     // Remove data parameter just in case it was included in the confirmation so we can add it manually later.
     $confirmationurl->remove_params('data');
     $confirmationpath = $confirmationurl->out(false);
