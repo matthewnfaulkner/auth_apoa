@@ -32,6 +32,8 @@ class observer {
      * When a user is enrolled in the main subscription, set their membership category and approve it.
      * Category is their answer to "Which best describes you?", their current choosable category, or Fellow.
      * Trainee, Honorary and Life Fellows keep theirs.
+     * A lifetime enrolment (no end date) makes a Fellow a Life Fellow. Other categories, such as
+     * Senior Fellow, are not changed by a lifetime enrolment.
      * Membership expiration date is set to the enrolment end date, or 0 for Life Fellows
      * and enrolments without an end date.
      *
@@ -56,12 +58,18 @@ class observer {
             $category = get_user_preferences('auth_apoa_category_preference', $default, $userid);
         }
 
+        $timeend = $DB->get_field('user_enrolments', 'timeend', ['id' => $event->objectid]);
+
+        // Lifetime subscription: Fellows become Life Fellows.
+        if (!$timeend && $category == 'Fellow') {
+            $category = 'Life Fellow';
+        }
+
         profile_save_custom_fields($userid, [
             'membership_category' => $category,
             'membership_category_approved' => 1,
         ]);
 
-        $timeend = $DB->get_field('user_enrolments', 'timeend', ['id' => $event->objectid]);
         $expires = ($timeend && $category != 'Life Fellow') ? $timeend : 0;
         profile_save_custom_fields($userid, ['membership_expires' => $expires]);
 
