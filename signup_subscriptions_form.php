@@ -57,7 +57,7 @@ class signup_category_preference_form extends \moodleform {
 
         $this->set_display_vertical();
 
-        $mform->addElement('submit', 'submitbutton', get_string('continue'));
+        $mform->addElement('submit', 'submitbutton', $this->_customdata['submitlabel'] ?? get_string('continue'));
     }
 
     public function validation($data, $files) {

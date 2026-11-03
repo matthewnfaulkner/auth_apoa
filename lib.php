@@ -831,3 +831,24 @@ function auth_apoa_user_preferences(){
         ]];
 }
 
+/**
+ * Adds "Which best describes you?" to the user's Preferences page.
+ *
+ * @param navigation_node $navigation
+ * @param stdClass $user
+ * @param context_user $usercontext
+ * @param stdClass $course
+ * @param context_course $coursecontext
+ */
+function auth_apoa_extend_navigation_user_settings(navigation_node $navigation, $user, $usercontext, $course, $coursecontext) {
+    global $USER;
+
+    // The preference can only be set by the user themselves.
+    if (isguestuser() || $user->id != $USER->id) {
+        return;
+    }
+    if ($usernode = $navigation->find('useraccount', navigation_node::TYPE_CONTAINER)) {
+        $usernode->add(get_string('categorypreference', 'auth_apoa'),
+            new moodle_url('/auth/apoa/categorypreference.php'), navigation_node::TYPE_SETTING);
+    }
+}

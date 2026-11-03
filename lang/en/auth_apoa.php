@@ -347,3 +347,4 @@ $string['categorypreference_seniorfellow'] = 'Orthopaedic surgeon retired from a
 $string['categorypreference_associatefellow'] = 'Doctor of a medical specialty other than orthopaedics';
 $string['categorypreference_affiliatefellow'] = 'Paramedical professional or scientist';
 $string['nocategorypreferenceselected'] = 'Please choose which best describes you.';
+$string['categorypreferencesaved'] = 'Your answer has been saved.';
